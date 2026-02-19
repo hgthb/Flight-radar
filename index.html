@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Radar A.7 - Smart Init</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0b0f19; color: white; margin: 0; padding: 5px; }
+        * { box-sizing: border-box; }
+
+        h2 { text-align: center; color: #00d4ff; font-size: 1.1rem; margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .id-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-admin { background: #064e3b; color: #34d399; border-color: #059669; }
+        .badge-guest { background: #451a03; color: #fbbf24; border-color: #d97706; }
+        
+        .control-panel { background: #1e293b; padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #334155; box-shadow: 0 2px 10px rgba(255,255,255,0.05); display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+        .settings-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 70px; }
+        .control-panel label { font-size: 10px; color: #94a3b8; font-weight: 700; text-align: center; text-transform: uppercase; white-space: nowrap; }
+        .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 700; border: 1px solid #475569; margin: 0; }
+        .control-panel input { padding: 0 5px; background: #f8fafc; color: #0f172a; text-align: center; transition: all 0.3s; }
+        
+        .interval-active { background-color: #39ff14 !important; color: #ff0000 !important; font-weight: 900 !important; border-color: #39ff14 !important; }
+        .interval-stopped { background-color: #333 !important; color: #888 !important; border-color: #555 !important; }
+        #airport-code { text-transform: uppercase; border-color: #3b82f6; }
+        
+        button { cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; border: none; }
+        #btn-save { background: #10b981; transition: background 0.3s; }
+        #btn-save:disabled { background: #1e293b; color: #94a3b8; cursor: not-allowed; border: 1px solid #334155; }
+        #btn-stop { background: #ef4444; color: white; font-weight: bold; border: 1px solid #b91c1c; }
+        #btn-flash-scan { border: 1px solid #ff99bb; background: #ff0055; animation: pulse-neon 2s infinite; }
+        .mode-toggle { display: flex; align-items: center; justify-content: center; background: #334155; color: #cbd5e1; cursor: pointer; border: 1px solid #475569; }
+        .mode-active { background: #3b82f6; color: white; border-color: #60a5fa; }
+        #btn-download { background: #f59e0b; color: #78350f; border: none; }
+        #btn-download:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+        .group-download { flex: 1; min-width: 80px; }
+
+        @keyframes pulse-neon { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
+        #admin-panel { background: #2f1010; padding: 5px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #7f1d1d; display: none; }
+        .admin-header { font-size: 10px; color: #fca5a5; font-weight: bold; text-align: center; margin-bottom: 4px; text-transform: uppercase; }
+        .admin-row { display: flex; justify-content: space-between; align-items: center; background: #450a0a; padding: 4px; margin-bottom: 2px; border-radius: 3px; font-size: 11px; }
+        .admin-info { color: #fecaca; }
+        .btn-kill { background: #ff0000; color: white; border: none; padding: 2px 8px; border-radius: 3px; font-size: 9px; cursor: pointer; font-weight: bold; }
+
+        .queue-bar { background: #0f172a; padding: 5px 10px; margin-bottom: 10px; border-radius: 4px; font-size: 11px; color: #38bdf8; font-family: monospace; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        .queue-label { color: #94a3b8; margin-right: 8px; font-weight: bold; }
+        .queue-list { color: #facc15; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 60%; }
+        
+        #btn-about { background: #111827; color: #c0c0c0; border: 1px solid #374151; box-shadow: inset 2px 2px 5px #000; text-shadow: 1px 1px 0px rgba(255,255,255,0.1); font-size: 9px; font-weight: bold; padding: 3px 6px; border-radius: 4px; cursor: pointer; text-transform: none; margin-right: 5px; }
+        .current-id-display { color: #4ade80; font-weight: bold; white-space: nowrap; }
+
+        .summary-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 0 2px; }
+        .total-text { font-size: 13px; color: #facc15; font-weight: bold; }
+        #search-box { background: #161b22; border: 1px solid #30363d; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 120px; }
+        #search-box:focus { border-color: #3b82f6; outline: none; }
+
+        .table-wrapper { background: #161b22; border-radius: 8px; border: 1px solid #30363d; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: #21262d; color: #94a3b8; padding: 10px 4px; text-align: left; font-size: 11px; text-transform: uppercase; }
+        td { padding: 10px 4px; border-bottom: 1px solid #30363d; vertical-align: middle; }
+        
+        .flight-no { font-weight: 800; color: #38bdf8; font-size: 15px; }
+        .route-text { font-weight: 800; color: #fbbf24; font-size: 13px; display: block; }
+        .time-group { display: flex; flex-direction: column; line-height: 1.3; min-width: 60px; } 
+        .real-time { margin-top: 4px; font-weight: bold; color: #4ade80; font-size: 13px; }
+        .status-pill { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; text-align: center; min-width: 80px; margin-left: 8px; }
+        .st-completed { background-color: #d4edda; color: #155724; } 
+        .st-plan { background-color: #334155; color: #94a3b8; }      
+        .st-live { background-color: #00FFFF; color: #000; animation: blinker 2s infinite; }
+        .st-unknown { background-color: #4b5563; color: #e5e7eb; } 
+        @keyframes blinker { 50% { opacity: 0.6; } }
+        @keyframes highlightRow { 0% { background-color: #eab308; } 50% { background-color: transparent; } 100% { background-color: #eab308; } }
+        .blink-row { animation: highlightRow 1s infinite; }
+        .pair-blue { background: rgba(14, 165, 233, 0.15); border-left: 3px solid #0ea5e9; }
+        .pair-brown { background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; }
+        .standalone { background: #ffff00 !important; border-left: 4px solid #ff0000; }
+        .standalone td, .standalone .flight-no, .standalone .route-text, .standalone div, .standalone span { color: #ff0000 !important; }
+        .type-indicator { font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-right: 4px; font-weight: bold; }
+        .type-arr { background: #1e40af; color: #bfdbfe; }
+        .type-dep { background: #166534; color: #bbf7d0; }
+        .arr-cell-content { display: flex; align-items: center; justify-content: flex-start; }
+        
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(2px); }
+        .modal-content { background: linear-gradient(135deg, #1e293b, #0f172a); margin: 25% auto; padding: 20px; border: 1px solid #334155; width: 85%; max-width: 320px; border-radius: 10px; text-align: center; color: #fff; box-shadow: 0 0 25px rgba(0,0,0,0.7); animation: popIn 0.3s ease-out; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-title-notice { font-size: 16px; font-weight: 900; color: #facc15; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px solid #334155; padding-bottom: 10px; letter-spacing: 1px; }
+        .modal-text { font-size: 14px; margin: 15px 0; color: #e2e8f0; font-weight: 500; line-height: 1.5; }
+        .modal-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .btn-modal { padding: 8px 20px; border-radius: 4px; font-weight: bold; border: none; cursor: pointer; font-size: 12px; min-width: 80px; }
+        .btn-yes { background: #10b981; color: white; }
+        .btn-no { background: #ef4444; color: white; }
+        .btn-ok { background: #3b82f6; color: white; width: 100%; }
+        .about-text { font-size: 14px; color: #e2e8f0; font-weight: 500; margin: 8px 0; }
+        .about-highlight { color: #00d4ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>RADAR A.7 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+
+    <div class="control-panel">
+        <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
+        <div class="settings-group" style="flex: 1.5;"><label>Ngày</label><input type="date" id="scan-date"></div>
+        <div class="settings-group"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
+        
+        <div class="settings-group" style="flex: 2;"><label>Action</label><button id="btn-save">QUEUE</button></div>
+        <div class="settings-group" style="flex: 1;"><label>Stop</label><button id="btn-stop" title="Dừng ID này">⛔</button></div>
+
+        <div class="settings-group"><label>Scan</label><button id="btn-flash-scan">QUÉT</button></div>
+        <div class="settings-group"><label>Chế độ</label><div id="mode-toggle" class="mode-toggle">THỦ CÔNG</div></div>
+        <div class="settings-group group-download"><label>Dữ liệu</label><button id="btn-download">⬇ TẢI EXCEL</button></div>
+    </div>
+
+    <div id="admin-panel">
+        <div class="admin-header">🛡️ QUẢN LÝ NGƯỜI DÙNG (ADMIN)</div>
+        <div id="admin-list"></div>
+    </div>
+
+    <div class="queue-bar">
+        <div style="display:flex; align-items:center; overflow:hidden;">
+            <span class="queue-label">⟳ HÀNG ĐỢI:</span>
+            <span id="active-queue" class="queue-list">Đang tải...</span>
+        </div>
+        <div style="display:flex; align-items:center;">
+            <button id="btn-about">About</button>
+            <span id="my-device-id" class="current-id-display">ID: ...</span>
+        </div>
+    </div>
+
+    <div class="summary-bar">
+        <input type="text" id="search-box" placeholder="🔍 Tìm số hiệu (VD: 206)">
+        <span id="total-flights" class="total-text">Tổng: 0 chuyến</span>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead><tr><th style="text-align:center">#</th><th>Chuyến/Reg</th><th>Lộ trình/Time</th><th>CẤT CÁNH</th><th>HẠ CÁNH / STATUS</th></tr></thead>
+            <tbody id="flight-data"></tbody>
+        </table>
+    </div>
+
+    <div id="noticeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title-notice">Notice !</div>
+            <div id="notice-text" class="modal-text">Nội dung thông báo...</div>
+            <div class="modal-buttons"><button id="btn-notice-ok" class="btn-modal btn-ok">OK</button></div>
+        </div>
+    </div>
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title-notice" style="color:#ef4444;">XÁC NHẬN</div>
+            <div id="confirm-text" class="modal-text">Bạn có chắc chắn?</div>
+            <div class="modal-buttons"><button id="btn-confirm-yes" class="btn-modal btn-yes">CÓ</button><button id="btn-confirm-no" class="btn-modal btn-no">KHÔNG</button></div>
+        </div>
+    </div>
+    <div id="aboutModal" class="modal">
+        <div class="modal-content" style="padding-top:30px; padding-bottom:30px;">
+            <p class="about-text">Developed by <span class="about-highlight">Mr Hưng</span></p>
+            <p class="about-text">Tel : <span class="about-highlight">0965594679</span></p>
+            <p class="about-text">Email : <span class="about-highlight">ndhung.pl@gmail.com</span></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://pleiku-flight-radar-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "pleiku-flight-radar" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        const airportInput = document.getElementById('airport-code');
+        const dateInput = document.getElementById('scan-date');
+        const intervalInput = document.getElementById('scan-interval');
+        const btnSave = document.getElementById('btn-save');
+        const btnStop = document.getElementById('btn-stop');
+        const btnFlashScan = document.getElementById('btn-flash-scan');
+        const modeToggle = document.getElementById('mode-toggle');
+        const btnDownload = document.getElementById('btn-download');
+        const searchBox = document.getElementById('search-box');
+        
+        const idBadge = document.getElementById('id-badge');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminList = document.getElementById('admin-list');
+        const btnAbout = document.getElementById('btn-about');
+        const noticeModal = document.getElementById('noticeModal');
+        const confirmModal = document.getElementById('confirmModal');
+        const aboutModal = document.getElementById('aboutModal');
+
+        const today = new Date(new Date().getTime() + 7*60*60*1000).toISOString().split('T')[0];
+        let downloadMode = 'MANUAL';
+        let isFirstLoad = true;
+        let isAdminUser = false;
+
+        // Init Date
+        dateInput.value = today;
+
+        const currentID = (() => { let id = localStorage.getItem('radar_device_unique_id'); if (!id) { id = "D-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 1000); localStorage.setItem('radar_device_unique_id', id); } return id; })();
+        document.getElementById('my-device-id').innerText = `ID: ...${currentID.slice(-4)}`;
+
+        function showNotice(msg) { document.getElementById('notice-text').innerText = msg; noticeModal.style.display = "block"; }
+        document.getElementById('btn-notice-ok').onclick = () => { noticeModal.style.display = "none"; };
+        function showConfirm(msg, callback) { document.getElementById('confirm-text').innerText = msg; confirmModal.style.display = "block"; const btnYes = document.getElementById('btn-confirm-yes'); const newBtnYes = btnYes.cloneNode(true); btnYes.parentNode.replaceChild(newBtnYes, btnYes); newBtnYes.onclick = () => { confirmModal.style.display = "none"; callback(); }; document.getElementById('btn-confirm-no').onclick = () => { confirmModal.style.display = "none"; }; }
+        window.onclick = (event) => { if (event.target == noticeModal) noticeModal.style.display = "none"; if (event.target == confirmModal) confirmModal.style.display = "none"; if (event.target == aboutModal) aboutModal.style.display = "none"; };
+        btnAbout.ondblclick = () => { aboutModal.style.display = "block"; };
+        function setEditingState() { intervalInput.className = ''; btnSave.innerText = "QUEUE"; btnSave.disabled = false; }
+        function setSavedState(intervalVal) { const val = parseInt(intervalVal); if (val <= 0) { intervalInput.className = 'interval-stopped'; } else { intervalInput.className = 'interval-active'; } btnSave.innerText = "QUEUED"; btnSave.disabled = true; }
+        airportInput.addEventListener('input', setEditingState); dateInput.addEventListener('input', setEditingState); intervalInput.addEventListener('input', setEditingState);
+        
+        btnSave.onclick = () => { const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; const intervalRaw = intervalInput.value; if (!airport || !date || !intervalRaw) { showNotice("Vui lòng nhập đầy đủ Sân bay, Ngày và Số phút!"); return; } const interval = parseInt(intervalRaw); update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: interval, timestamp: Date.now() }).then(() => { setSavedState(interval); fetchDataByInput(); }); };
+        function checkAccessAndAdmin(whitelist) { let list = whitelist || []; let idx = list.indexOf(currentID); if (idx === -1) { if (list.length >= 4) { showNotice("Over limit !"); document.querySelector('.control-panel').style.opacity = "0.5"; document.querySelectorAll('input, button').forEach(el => el.disabled = true); document.getElementById('active-queue').innerText = "ACCESS DENIED"; return false; } else { list.push(currentID); idx = list.length - 1; update(ref(db, 'settings'), { whitelist: list }); } } isAdminUser = (idx !== -1 && idx < 2); idBadge.style.display = "inline-block"; idBadge.innerText = `ID${idx + 1}`; idBadge.className = "id-badge " + (isAdminUser ? "badge-admin" : "badge-guest"); adminPanel.style.display = isAdminUser ? "block" : "none"; return true; }
+        function renderAdminList(requests) { if (!isAdminUser || !requests) return; let html = ""; Object.entries(requests).forEach(([uid, data]) => { const shortId = uid.slice(-4); const interval = parseInt(data.interval) || 0; const statusColor = interval > 0 ? "#4ade80" : "#9ca3af"; let actionBtn = ""; if (interval > 0) { actionBtn = `<button class="btn-kill" data-uid="${uid}">DỪNG</button>`; } else { actionBtn = `<span style="font-size:9px; color:#666; font-weight:bold; padding:0 8px;">ĐÃ DỪNG</span>`; } html += `<div class="admin-row"><span class="admin-info" style="color:${statusColor}">ID..${shortId} : ${data.code} (${interval}p)</span>${actionBtn}</div>`; }); adminList.innerHTML = html || "<div style='text-align:center; color:#666; font-size:10px;'>Không có ID nào đang chạy</div>"; document.querySelectorAll('.btn-kill').forEach(btn => { btn.onclick = function() { const targetUid = this.getAttribute('data-uid'); showConfirm(`Admin muốn dừng ID ...${targetUid.slice(-4)}?`, () => { update(ref(db, `settings/requests/${targetUid}`), { interval: 0 }); }); }; }); }
+        btnStop.onclick = () => { showConfirm("Bạn có chắc muốn DỪNG quét cho ID này?", () => { intervalInput.value = 0; const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: 0, timestamp: Date.now() }).then(() => { setSavedState(0); showNotice("Đã dừng quét! Robot A.94 sẽ bỏ qua ID này."); }); }); };
+        searchBox.addEventListener('keyup', () => { const keyword = searchBox.value.toUpperCase().trim(); const rows = document.querySelectorAll('#flight-data tr'); let found = false; rows.forEach(row => { row.classList.remove('blink-row'); const flightNum = row.getAttribute('data-flight'); if (keyword && flightNum && flightNum.includes(keyword) && !found) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.classList.add('blink-row'); found = true; } }); });
+
+        function fetchDataByInput() {
+            const airport = airportInput.value.toUpperCase().trim() || "PXU"; const date = dateInput.value; const now = new Date();
+            get(ref(db, `database_flights/${airport}/${date}`)).then(snap => {
+                if (snap.exists()) {
+                    let flights = Object.values(snap.val());
+                    flights.forEach(f => {
+                        if (f.dep_real && f.dep_real !== "--:--") { try { const [h, m] = f.dep_real.split(':').map(Number); const [y, mon, d] = date.split('-').map(Number); const flightDepTime = new Date(y, mon - 1, d, h, m); if (flightDepTime > now) { f.dep_real = "--:--"; } } catch (e) {} }
+                    });
+                    flights.sort((a,b) => a.raw_sort_time - b.raw_sort_time); renderTable(flights, date);
+                } else { document.getElementById('flight-data').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#aaa">Không có dữ liệu cho ngày này...</td></tr>'; document.getElementById('total-flights').innerText = `Tổng: 0 chuyến`; }
+            });
+        }
+
+        function renderTable(rawFlights, dateStr) {
+            const listDiv = document.getElementById('flight-data');
+            let groups = []; let used = new Set();
+            rawFlights.forEach(f => {
+                const fId = f.flight + "_" + f.raw_sort_time + "_" + f.type; if (used.has(fId)) return; let currentGroup = [f]; used.add(fId);
+                if (f.type === 'arr') {
+                    const pair = rawFlights.find(p => { const pId = p.flight + "_" + p.raw_sort_time + "_" + p.type; if (p.type !== 'dep' || used.has(pId)) return false; if (f.o_iata !== p.d_iata || f.d_iata !== p.o_iata) return false; const fMatch = f.flight.match(/^([A-Z0-9]{2})(\d+)$/); const pMatch = p.flight.match(/^([A-Z0-9]{2})(\d+)$/); if (fMatch && pMatch) { const fCode = fMatch[1]; const fNum = parseInt(fMatch[2]); const pCode = pMatch[1]; const pNum = parseInt(pMatch[2]); if (fCode === pCode && Math.abs(fNum - pNum) === 1) return true; } return false; });
+                    if (pair) { currentGroup.push(pair); used.add(pair.flight + "_" + pair.raw_sort_time + "_" + pair.type); }
+                } groups.push(currentGroup);
+            });
+
+            document.getElementById('total-flights').innerText = `Tổng: ${rawFlights.length} chuyến`;
+            let html = ""; let stt = 1; let pIdx = 0; const now = new Date();
+            
+            groups.forEach(group => {
+                const colorClass = group.length > 1 ? (pIdx++ % 2 === 0 ? "pair-blue" : "pair-brown") : "standalone";
+                group.forEach(f => {
+                    let statusText = f.status || "UNKNOWN"; let icon = f.icon || "✈️"; let stClass = "st-plan";
+                    const upStatus = statusText.toUpperCase();
+                    if (upStatus.includes("LANDED")) stClass = "st-completed";
+                    else if (upStatus.includes("FLYING") || upStatus.includes("ACTIVE") || upStatus.includes("DEPARTED")) stClass = "st-live";
+                    else if (upStatus.includes("UNKNOWN") || upStatus.includes("CANCEL")) stClass = "st-unknown";
+
+                    let depDisplay = ""; if (f.dep_real && f.dep_real !== "--:--") { depDisplay = `<span class="real-time">A: ${f.dep_real}</span>`; } else if (f.dep_est && f.dep_est !== "--:--") { depDisplay = `<span class="real-time">E: ${f.dep_est}</span>`; }
+                    let arrDisplay = ""; if (f.arr_real && f.arr_real !== "--:--") { arrDisplay = `<span class="real-time">A: ${f.arr_real}</span>`; } else if (f.arr_est && f.arr_est !== "--:--") { arrDisplay = `<span class="real-time">E: ${f.arr_est}</span>`; }
+
+                    html += `<tr class="${colorClass}" data-flight="${f.flight}">
+                        <td style="text-align:center; font-weight:bold; color:#94a3b8">${stt++}</td>
+                        <td><span class="flight-no">${f.flight}</span><span style="color:#facc15; font-weight:bold; display:block; font-size:12px">${f.reg}</span></td>
+                        <td><div class="route-text"><span class="type-indicator type-${f.type}">${f.type==='arr'?'ĐẾN':'ĐI'}</span> ${f.o_iata}-${f.d_iata}</div><div style="font-size:10px; color:#94a3b8">${f.aircraft} | ⏱${f.flight_time} ${f.duration?`<span style="color:#facc15">(⏳ ${f.duration})</span>`:''}</div></td>
+                        <td><div class="time-group"><span style="font-size:11px; color:#94a3b8">S: ${f.dep_sched || '--:--'}</span>${depDisplay}</div></td>
+                        <td><div class="arr-cell-content"><div class="time-group"><span style="font-size:11px; color:#94a3b8">S: ${f.arr_sched || '--:--'}</span>${arrDisplay}</div><div class="status-pill ${stClass}">${icon} ${statusText}</div></div></td>
+                    </tr>`;
+                });
+            });
+            listDiv.innerHTML = html;
+        }
+
+        btnFlashScan.onclick = () => { update(ref(db, 'settings'), { force_scan: true }); btnFlashScan.innerText = "⏳..."; setTimeout(() => btnFlashScan.innerText = "🚀 QUÉT", 10000); };
+        
+        onValue(ref(db, 'settings'), snap => {
+            if (snap.exists()) {
+                const s = snap.val(); const hasAccess = checkAccessAndAdmin(s.whitelist); if (!hasAccess) return;
+                renderAdminList(s.requests); const reqs = s.requests || {};
+                
+                // --- LOGIC A.7: LOAD CONFIG, BUT FORCE TODAY'S DATE ---
+                if (isFirstLoad) {
+                    if (!reqs[currentID]) {
+                        // Chưa có -> Tạo mới hoàn toàn (như A.6)
+                        update(ref(db, `settings/requests/${currentID}`), { 
+                            code: "PXU", date: today, interval: 10, timestamp: Date.now() 
+                        });
+                        airportInput.value = "PXU"; dateInput.value = today; intervalInput.value = 10; setSavedState(10);
+                    } else {
+                        // Đã có -> Load Code & Interval từ DB, nhưng Date luôn là Today
+                        const myReq = reqs[currentID];
+                        if (myReq.code) airportInput.value = myReq.code;
+                        if (myReq.interval !== undefined) { intervalInput.value = myReq.interval; setSavedState(myReq.interval); }
+                        
+                        // QUAN TRỌNG: Cập nhật Date về hôm nay
+                        dateInput.value = today;
+                        // Đồng thời update lên Firebase để backend biết phải quét ngày hôm nay
+                        if (myReq.date !== today) {
+                            update(ref(db, `settings/requests/${currentID}`), { date: today });
+                        }
+                    }
+                    isFirstLoad = false;
+                } else if (reqs[currentID]) {
+                    const myReq = reqs[currentID];
+                    // Nếu ngày trên database khác ngày đang hiển thị (do qua ngày mới), cập nhật lại UI
+                    if (myReq.date && myReq.date !== dateInput.value) { dateInput.value = myReq.date; }
+                    
+                    if (parseInt(myReq.interval) === 0 && parseInt(intervalInput.value) !== 0) { intervalInput.value = 0; setSavedState(0); }
+                }
+                const displayItems = Object.entries(reqs).sort(([,a],[,b]) => a.timestamp - b.timestamp).map(([id, data]) => `ID...${id.slice(-4)}:${data.code}`);
+                document.getElementById('active-queue').innerText = displayItems.join(" ➜ ") || "Trống"; fetchDataByInput();
+            }
+        });
+        
+        dateInput.onchange = fetchDataByInput; airportInput.oninput = fetchDataByInput;
+        modeToggle.onclick = () => { if (downloadMode === 'MANUAL') { downloadMode = 'AUTO'; modeToggle.innerText = "TỰ ĐỘNG"; modeToggle.classList.add("mode-active"); btnDownload.innerText = "⏳ CHỜ (1-10)"; btnDownload.disabled = true; localStorage.setItem('dl_mode', 'AUTO'); checkAutoDownloadAndClean(); } else { downloadMode = 'MANUAL'; modeToggle.innerText = "THỦ CÔNG"; modeToggle.classList.remove("mode-active"); btnDownload.innerText = "⬇ TẢI EXCEL"; btnDownload.disabled = false; localStorage.setItem('dl_mode', 'MANUAL'); } };
+        const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
+        btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Hàng đợi trống!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("Không có dữ liệu!"); btnDownload.innerText = "⬇ TẢI EXCEL"; return; } exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ XONG"; setTimeout(() => { btnDownload.innerText = "⬇ TẢI EXCEL"; }, 3000); }); };
+        function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ ĐÃ XONG"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) exportToCSV(exportList, `Radar_${airport}_Month_${targetMonthStr}.csv`); if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ ĐÃ XONG"; } }); } }
+    </script>
+</body>
+</html>
