@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.7 - Smart Init</title>
+    <title>Radar A.8 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0b0f19; color: white; margin: 0; padding: 5px; }
         * { box-sizing: border-box; }
@@ -54,8 +54,8 @@
         #search-box { background: #161b22; border: 1px solid #30363d; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 120px; }
         #search-box:focus { border-color: #3b82f6; outline: none; }
 
-        .table-wrapper { background: #161b22; border-radius: 8px; border: 1px solid #30363d; overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-wrapper { background: #161b22; border-radius: 8px; border: 1px solid #30363d; overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 300px; }
         th { background: #21262d; color: #94a3b8; padding: 10px 4px; text-align: left; font-size: 11px; text-transform: uppercase; }
         td { padding: 10px 4px; border-bottom: 1px solid #30363d; vertical-align: middle; }
         
@@ -92,11 +92,24 @@
         .btn-ok { background: #3b82f6; color: white; width: 100%; }
         .about-text { font-size: 14px; color: #e2e8f0; font-weight: 500; margin: 8px 0; }
         .about-highlight { color: #00d4ff; font-weight: bold; }
+
+        /* --- RESPONSIVE TABLE FOR MOBILE --- */
+        @media (max-width: 600px) {
+            table { font-size: 12px; }
+            th { padding: 8px 2px; font-size: 9px; }
+            td { padding: 8px 2px; }
+            .flight-no { font-size: 13px; }
+            .route-text { font-size: 11px; }
+            .real-time { font-size: 11px; }
+            .time-group { min-width: 45px; }
+            .status-pill { min-width: 60px; font-size: 9px; padding: 3px 4px; margin-left: 2px; }
+            .type-indicator { font-size: 8px; padding: 1px 3px; }
+        }
     </style>
 </head>
 <body>
 
-    <h2>RADAR A.7 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+    <h2>RADAR A.8 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
     <div class="control-panel">
         <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -271,7 +284,7 @@
                 const s = snap.val(); const hasAccess = checkAccessAndAdmin(s.whitelist); if (!hasAccess) return;
                 renderAdminList(s.requests); const reqs = s.requests || {};
                 
-                // --- LOGIC A.7: LOAD CONFIG, BUT FORCE TODAY'S DATE ---
+                // --- LOGIC A.8: LOAD CONFIG, BUT FORCE TODAY'S DATE ---
                 if (isFirstLoad) {
                     if (!reqs[currentID]) {
                         // Chưa có -> Tạo mới hoàn toàn (như A.6)
