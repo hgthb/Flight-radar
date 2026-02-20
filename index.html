@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.11 - Smart Init</title>
+    <title>Radar A.8 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0b0f19; color: white; margin: 0; padding: 5px; }
         * { box-sizing: border-box; }
@@ -19,10 +19,6 @@
         .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 700; border: 1px solid #475569; margin: 0; }
         .control-panel input { padding: 0 5px; background: #f8fafc; color: #0f172a; text-align: center; transition: all 0.3s; }
         
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-
         .interval-active { background-color: #39ff14 !important; color: #ff0000 !important; font-weight: 900 !important; border-color: #39ff14 !important; }
         .interval-stopped { background-color: #333 !important; color: #888 !important; border-color: #555 !important; }
         #airport-code { text-transform: uppercase; border-color: #3b82f6; }
@@ -96,16 +92,29 @@
         .btn-ok { background: #3b82f6; color: white; width: 100%; }
         .about-text { font-size: 14px; color: #e2e8f0; font-weight: 500; margin: 8px 0; }
         .about-highlight { color: #00d4ff; font-weight: bold; }
+
+        /* --- RESPONSIVE TABLE FOR MOBILE --- */
+        @media (max-width: 600px) {
+            table { font-size: 12px; }
+            th { padding: 8px 2px; font-size: 9px; }
+            td { padding: 8px 2px; }
+            .flight-no { font-size: 13px; }
+            .route-text { font-size: 11px; }
+            .real-time { font-size: 11px; }
+            .time-group { min-width: 45px; }
+            .status-pill { min-width: 60px; font-size: 9px; padding: 3px 4px; margin-left: 2px; }
+            .type-indicator { font-size: 8px; padding: 1px 3px; }
+        }
     </style>
 </head>
 <body>
 
-    <h2>RADAR A.11 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+    <h2>RADAR A.8 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
     <div class="control-panel">
         <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
         <div class="settings-group" style="flex: 1.5;"><label>Ngày</label><input type="date" id="scan-date"></div>
-        <div class="settings-group" style="flex: 0.8; min-width: 50px;"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
+        <div class="settings-group"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
         
         <div class="settings-group" style="flex: 2;"><label>Action</label><button id="btn-save">QUEUE</button></div>
         <div class="settings-group" style="flex: 1;"><label>Stop</label><button id="btn-stop" title="Dừng ID này">⛔</button></div>
@@ -199,7 +208,7 @@
         // Init Date
         dateInput.value = today;
 
-        const currentID = "D-FIXED-001";
+        const currentID = (() => { let id = localStorage.getItem('radar_device_unique_id'); if (!id) { id = "D-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 1000); localStorage.setItem('radar_device_unique_id', id); } return id; })();
         document.getElementById('my-device-id').innerText = `ID: ...${currentID.slice(-4)}`;
 
         function showNotice(msg) { document.getElementById('notice-text').innerText = msg; noticeModal.style.display = "block"; }
