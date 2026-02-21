@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.11 - Smart Init</title>
+    <title>Radar A.12 - Smart Init</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f4f8; color: #1e293b; margin: 0; padding: 5px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fffcf9; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
 
         h2 { text-align: center; color: #0284c7; font-size: 1.1rem; margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; }
@@ -16,7 +16,7 @@
         .control-panel { background: #ffffff; padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
         .settings-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 70px; }
         .control-panel label { font-size: 10px; color: #475569; font-weight: 800; text-align: center; text-transform: uppercase; white-space: nowrap; }
-        .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; margin: 0; }
+        .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 800; border: 1px solid #cbd5e1; margin: 0; }
         .control-panel input { padding: 0 5px; background: #f8fafc; color: #0f172a; text-align: center; transition: all 0.3s; max-height: 38px; box-sizing: border-box; }
         .control-panel input[type="date"] { -webkit-appearance: none; appearance: none; }
         
@@ -87,13 +87,13 @@
         .modal-content { background: #ffffff; margin: 25% auto; padding: 20px; border: 1px solid #cbd5e1; width: 85%; max-width: 320px; border-radius: 10px; text-align: center; color: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.15); animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-title-notice { font-size: 16px; font-weight: 900; color: #ea580c; margin-bottom: 15px; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; letter-spacing: 1px; }
-        .modal-text { font-size: 14px; margin: 15px 0; color: #334155; font-weight: 700; line-height: 1.5; }
+        .modal-text { font-size: 14px; margin: 15px 0; color: #334155; font-weight: 800; line-height: 1.5; }
         .modal-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
         .btn-modal { padding: 8px 20px; border-radius: 4px; font-weight: 900; border: none; cursor: pointer; font-size: 12px; min-width: 80px; color: white; }
         .btn-yes { background: #10b981; }
         .btn-no { background: #ef4444; }
         .btn-ok { background: #3b82f6; width: 100%; }
-        .about-text { font-size: 14px; color: #334155; font-weight: 700; margin: 8px 0; }
+        .about-text { font-size: 14px; color: #334155; font-weight: 800; margin: 8px 0; }
         .about-highlight { color: #0284c7; font-weight: 900; }
 
         /* --- RESPONSIVE TABLE FOR MOBILE --- */
@@ -112,7 +112,7 @@
 </head>
 <body>
 
-    <h2>RADAR A.11 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+    <h2>RADAR A.12 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
     <div class="control-panel">
         <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
