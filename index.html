@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.13 - Smart Init</title>
+    <title>Radar A.14 - Smart Init</title>
     <style>
-        /* --- CHỈNH SỬA DUY NHẤT: Đổi background từ #fffcf9 sang #f0ece9 --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0ece9; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
+
+        .top-section-bg { background-color: #dcbfa6; margin: -5px -5px 10px -5px; padding: 8px 5px 10px 5px; border-bottom: 2px solid #c8a98b; }
 
         h2 { text-align: center; color: #0284c7; font-size: 1.1rem; margin: 6px 0; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; }
         .id-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-admin { background: #d1fae5; color: #065f46; border-color: #10b981; }
         .badge-guest { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
         
-        .control-panel { background: #ffffff; padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+        .control-panel { background: rgba(255, 255, 255, 0.4); padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #c8a98b; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
         .settings-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 70px; }
         .control-panel label { font-size: 10px; color: #475569; font-weight: 800; text-align: center; text-transform: uppercase; white-space: nowrap; }
         .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 800; border: 1px solid #cbd5e1; margin: 0; }
@@ -44,7 +45,7 @@
         .admin-info { color: #7f1d1d; font-weight: bold; }
         .btn-kill { background: #ef4444; color: white; border: none; padding: 2px 8px; border-radius: 3px; font-size: 9px; cursor: pointer; font-weight: bold; }
 
-        .queue-bar { background: #ffffff; padding: 5px 10px; margin-bottom: 10px; border-radius: 4px; font-size: 11px; color: #0284c7; font-family: monospace; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .queue-bar { background: rgba(255, 255, 255, 0.4); padding: 5px 10px; margin-bottom: 0; border-radius: 4px; font-size: 11px; color: #0284c7; font-family: monospace; border: 1px solid #c8a98b; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .queue-label { color: #475569; margin-right: 8px; font-weight: 900; }
         .queue-list { color: #d97706; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 60%; }
         
@@ -113,34 +114,36 @@
 </head>
 <body>
 
-    <h2>RADAR A.13 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+    <div class="top-section-bg">
+        <h2>RADAR A.14 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
-    <div class="control-panel">
-        <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
-        <div class="settings-group" style="flex: 1.5;"><label>Ngày</label><input type="date" id="scan-date"></div>
-        <div class="settings-group" style="flex: 0.7; min-width: 50px; margin-left: 5px;"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
-        
-        <div class="settings-group" style="flex: 2;"><label>Action</label><button id="btn-save">QUEUE</button></div>
-        <div class="settings-group" style="flex: 1;"><label>Stop</label><button id="btn-stop" title="Dừng ID này">⛔</button></div>
+        <div class="control-panel">
+            <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
+            <div class="settings-group" style="flex: 1.5;"><label>Ngày</label><input type="date" id="scan-date"></div>
+            <div class="settings-group" style="flex: 0.7; min-width: 50px; margin-left: 5px;"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
+            
+            <div class="settings-group" style="flex: 2;"><label>Action</label><button id="btn-save">QUEUE</button></div>
+            <div class="settings-group" style="flex: 1;"><label>Stop</label><button id="btn-stop" title="Dừng ID này">⛔</button></div>
 
-        <div class="settings-group"><label>Scan</label><button id="btn-flash-scan">QUÉT</button></div>
-        <div class="settings-group"><label>Chế độ</label><div id="mode-toggle" class="mode-toggle">THỦ CÔNG</div></div>
-        <div class="settings-group group-download"><label>Dữ liệu</label><button id="btn-download">⬇ TẢI EXCEL</button></div>
-    </div>
-
-    <div id="admin-panel">
-        <div class="admin-header">🛡️ QUẢN LÝ NGƯỜI DÙNG (ADMIN)</div>
-        <div id="admin-list"></div>
-    </div>
-
-    <div class="queue-bar">
-        <div style="display:flex; align-items:center; overflow:hidden;">
-            <span class="queue-label">⟳ HÀNG ĐỢI:</span>
-            <span id="active-queue" class="queue-list">Đang tải...</span>
+            <div class="settings-group"><label>Scan</label><button id="btn-flash-scan">QUÉT</button></div>
+            <div class="settings-group"><label>Chế độ</label><div id="mode-toggle" class="mode-toggle">THỦ CÔNG</div></div>
+            <div class="settings-group group-download"><label>Dữ liệu</label><button id="btn-download">⬇ TẢI EXCEL</button></div>
         </div>
-        <div style="display:flex; align-items:center;">
-            <button id="btn-about">About</button>
-            <span id="my-device-id" class="current-id-display">ID: ...</span>
+
+        <div id="admin-panel">
+            <div class="admin-header">🛡️ QUẢN LÝ NGƯỜI DÙNG (ADMIN)</div>
+            <div id="admin-list"></div>
+        </div>
+
+        <div class="queue-bar">
+            <div style="display:flex; align-items:center; overflow:hidden;">
+                <span class="queue-label">⟳ HÀNG ĐỢI:</span>
+                <span id="active-queue" class="queue-list">Đang tải...</span>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button id="btn-about">About</button>
+                <span id="my-device-id" class="current-id-display">ID: ...</span>
+            </div>
         </div>
     </div>
 
