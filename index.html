@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.27 - Smart Init</title>
+    <title>Radar A.28 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -57,6 +57,11 @@
         #search-box { background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 120px; font-weight: bold; }
         #search-box:focus { border-color: #3b82f6; outline: none; background: #eff6ff; }
 
+        /* Nút TODAY / BACK TO TODAY */
+        #btn-today-toggle { background: #dc2626; color: #ffcc00; font-weight: 900; border: 1px solid #991b1b; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-shadow: 0 2px 4px rgba(0,0,0,0.2); text-transform: uppercase; }
+        @keyframes blinkTodayAnim { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); background-color: #ef4444; } }
+        .blink-today { animation: blinkTodayAnim 1s infinite; }
+
         .table-wrapper { background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow-x: auto; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 300px; }
         th { background: #f8fafc; color: #475569; padding: 10px 4px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1; font-weight: 900; }
@@ -71,7 +76,6 @@
         .st-plan { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }      
         .st-live { background-color: #cffafe; color: #083344; border: 1px solid #67e8f9; animation: blinker 2s infinite; }
         
-        /* Chỉnh sửa: Tần suất 2s, font size bằng 60% bản trước (13.1px), in đậm màu xanh lá cây, nền màu vàng không phát sáng */
         .st-flying { background-color: #ffff00; color: #16a34a; border: 1px solid #16a34a; animation: blinker 2s infinite; font-size: 13.1px; font-weight: 900; }
         
         .st-unknown { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; } 
@@ -119,7 +123,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.27 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.28 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -153,6 +157,7 @@
 
     <div class="summary-bar">
         <input type="text" id="search-box" placeholder="🔍 Tìm số hiệu (VD: 206)">
+        <button id="btn-today-toggle">TODAY</button>
         <span id="total-flights" class="total-text">Tổng: 0 chuyến</span>
     </div>
 
@@ -202,6 +207,7 @@
         const modeToggle = document.getElementById('mode-toggle');
         const btnDownload = document.getElementById('btn-download');
         const searchBox = document.getElementById('search-box');
+        const btnTodayToggle = document.getElementById('btn-today-toggle');
         
         const idBadge = document.getElementById('id-badge');
         const adminPanel = document.getElementById('admin-panel');
@@ -237,7 +243,20 @@
         btnStop.onclick = () => { showConfirm("Bạn có chắc muốn DỪNG quét cho ID này?", () => { intervalInput.value = 0; const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: 0, timestamp: Date.now() }).then(() => { setSavedState(0); showNotice("Đã dừng quét! Robot A.94 sẽ bỏ qua ID này."); }); }); };
         searchBox.addEventListener('keyup', () => { const keyword = searchBox.value.toUpperCase().trim(); const rows = document.querySelectorAll('#flight-data tr'); let found = false; rows.forEach(row => { row.classList.remove('blink-row'); const flightNum = row.getAttribute('data-flight'); if (keyword && flightNum && flightNum.includes(keyword) && !found) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.classList.add('blink-row'); found = true; } }); });
 
+        function updateTodayButton() {
+            if (dateInput.value === today) {
+                btnTodayToggle.innerText = "TODAY";
+                btnTodayToggle.classList.remove('blink-today');
+                btnTodayToggle.onclick = null;
+            } else {
+                btnTodayToggle.innerText = "BACK TO TODAY";
+                btnTodayToggle.classList.add('blink-today');
+                btnTodayToggle.onclick = () => { window.location.reload(); };
+            }
+        }
+
         function fetchDataByInput() {
+            updateTodayButton();
             const airport = airportInput.value.toUpperCase().trim() || "PXU"; const date = dateInput.value; const now = new Date();
             get(ref(db, `database_flights/${airport}/${date}`)).then(snap => {
                 if (snap.exists()) {
@@ -296,23 +315,18 @@
                 const s = snap.val(); const hasAccess = checkAccessAndAdmin(s.whitelist); if (!hasAccess) return;
                 renderAdminList(s.requests); const reqs = s.requests || {};
                 
-                // --- LOGIC A.8: LOAD CONFIG, BUT FORCE TODAY'S DATE ---
                 if (isFirstLoad) {
                     if (!reqs[currentID]) {
-                        // Chưa có -> Tạo mới hoàn toàn (như A.6)
                         update(ref(db, `settings/requests/${currentID}`), { 
                             code: "PXU", date: today, interval: 10, timestamp: Date.now() 
                         });
                         airportInput.value = "PXU"; dateInput.value = today; intervalInput.value = 10; setSavedState(10);
                     } else {
-                        // Đã có -> Load Code & Interval từ DB, nhưng Date luôn là Today
                         const myReq = reqs[currentID];
                         if (myReq.code) airportInput.value = myReq.code;
                         if (myReq.interval !== undefined) { intervalInput.value = myReq.interval; setSavedState(myReq.interval); }
                         
-                        // QUAN TRỌNG: Cập nhật Date về hôm nay
                         dateInput.value = today;
-                        // Đồng thời update lên Firebase để backend biết phải quét ngày hôm nay
                         if (myReq.date !== today) {
                             update(ref(db, `settings/requests/${currentID}`), { date: today });
                         }
@@ -320,7 +334,6 @@
                     isFirstLoad = false;
                 } else if (reqs[currentID]) {
                     const myReq = reqs[currentID];
-                    // Nếu ngày trên database khác ngày đang hiển thị (do qua ngày mới), cập nhật lại UI
                     if (myReq.date && myReq.date !== dateInput.value) { dateInput.value = myReq.date; }
                     
                     if (parseInt(myReq.interval) === 0 && parseInt(intervalInput.value) !== 0) { intervalInput.value = 0; setSavedState(0); }
