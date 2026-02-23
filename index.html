@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.29 - Smart Init</title>
+    <title>Radar A.30 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -123,7 +123,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.29 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.30 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -221,6 +221,7 @@
         let downloadMode = 'MANUAL';
         let isFirstLoad = true;
         let isAdminUser = false;
+        let currentAdminIndex = -1; // Biến lưu index của Admin hiện tại
 
         // Init Date
         dateInput.value = today;
@@ -238,8 +239,66 @@
         airportInput.addEventListener('input', setEditingState); dateInput.addEventListener('input', setEditingState); intervalInput.addEventListener('input', setEditingState);
         
         btnSave.onclick = () => { const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; const intervalRaw = intervalInput.value; if (!airport || !date || !intervalRaw) { showNotice("Vui lòng nhập đầy đủ Sân bay, Ngày và Số phút!"); return; } const interval = parseInt(intervalRaw); update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: interval, timestamp: Date.now() }).then(() => { setSavedState(interval); fetchDataByInput(); }); };
-        function checkAccessAndAdmin(whitelist) { let list = whitelist || []; let idx = list.indexOf(currentID); if (idx === -1) { if (list.length >= 4) { showNotice("Over limit !"); document.querySelector('.control-panel').style.opacity = "0.5"; document.querySelectorAll('input, button').forEach(el => el.disabled = true); document.getElementById('active-queue').innerText = "ACCESS DENIED"; return false; } else { list.push(currentID); idx = list.length - 1; update(ref(db, 'settings'), { whitelist: list }); } } isAdminUser = (idx !== -1 && idx < 2); idBadge.style.display = "inline-block"; idBadge.innerText = `ID${idx + 1}`; idBadge.className = "id-badge " + (isAdminUser ? "badge-admin" : "badge-guest"); adminPanel.style.display = isAdminUser ? "block" : "none"; return true; }
-        function renderAdminList(requests) { if (!isAdminUser || !requests) return; let html = ""; Object.entries(requests).forEach(([uid, data]) => { const shortId = uid.slice(-4); const interval = parseInt(data.interval) || 0; const statusColor = interval > 0 ? "#16a34a" : "#64748b"; let actionBtn = ""; if (interval > 0) { actionBtn = `<button class="btn-kill" data-uid="${uid}">DỪNG</button>`; } else { actionBtn = `<span style="font-size:9px; color:#475569; font-weight:bold; padding:0 8px;">ĐÃ DỪNG</span>`; } html += `<div class="admin-row"><span class="admin-info" style="color:${statusColor}">ID..${shortId} : ${data.code} (${interval}p)</span>${actionBtn}</div>`; }); adminList.innerHTML = html || "<div style='text-align:center; color:#64748b; font-size:10px; font-weight:bold;'>Không có ID nào đang chạy</div>"; document.querySelectorAll('.btn-kill').forEach(btn => { btn.onclick = function() { const targetUid = this.getAttribute('data-uid'); showConfirm(`Admin muốn dừng ID ...${targetUid.slice(-4)}?`, () => { update(ref(db, `settings/requests/${targetUid}`), { interval: 0 }); }); }; }); }
+        function checkAccessAndAdmin(whitelist) { let list = whitelist || []; let idx = list.indexOf(currentID); if (idx === -1) { if (list.length >= 4) { showNotice("Over limit !"); document.querySelector('.control-panel').style.opacity = "0.5"; document.querySelectorAll('input, button').forEach(el => el.disabled = true); document.getElementById('active-queue').innerText = "ACCESS DENIED"; return false; } else { list.push(currentID); idx = list.length - 1; update(ref(db, 'settings'), { whitelist: list }); } } isAdminUser = (idx !== -1 && idx < 2); currentAdminIndex = idx; idBadge.style.display = "inline-block"; idBadge.innerText = `ID${idx + 1}`; idBadge.className = "id-badge " + (isAdminUser ? "badge-admin" : "badge-guest"); adminPanel.style.display = isAdminUser ? "block" : "none"; return true; }
+        
+        function renderAdminList(requests) { 
+            if (!isAdminUser || !requests) return; 
+            let html = ""; 
+            Object.entries(requests).forEach(([uid, data]) => { 
+                const shortId = uid.slice(-4); 
+                const interval = parseInt(data.interval) || 0; 
+                const statusColor = interval > 0 ? "#16a34a" : "#64748b"; 
+                let actionBtn = ""; 
+                
+                if (interval > 0) { 
+                    actionBtn = `<button class="btn-kill" data-uid="${uid}">DỪNG</button>`; 
+                } else { 
+                    actionBtn = `<span style="font-size:9px; color:#475569; font-weight:bold; padding:0 8px;">ĐÃ DỪNG</span>`; 
+                } 
+
+                // Nếu là ID1, thêm nút XÓA
+                if (currentAdminIndex === 0) {
+                    actionBtn += `<button class="btn-delete" data-uid="${uid}" style="background:#b91c1c; color:white; border:none; padding:2px 8px; border-radius:3px; font-size:9px; cursor:pointer; font-weight:bold; margin-left:4px;">XÓA</button>`;
+                }
+
+                html += `<div class="admin-row"><span class="admin-info" style="color:${statusColor}">ID..${shortId} : ${data.code} (${interval}p)</span><div style="display:flex; align-items:center;">${actionBtn}</div></div>`; 
+            }); 
+            
+            adminList.innerHTML = html || "<div style='text-align:center; color:#64748b; font-size:10px; font-weight:bold;'>Không có ID nào đang chạy</div>"; 
+            
+            document.querySelectorAll('.btn-kill').forEach(btn => { 
+                btn.onclick = function() { 
+                    const targetUid = this.getAttribute('data-uid'); 
+                    showConfirm(`Admin muốn dừng ID ...${targetUid.slice(-4)}?`, () => { 
+                        update(ref(db, `settings/requests/${targetUid}`), { interval: 0 }); 
+                    }); 
+                }; 
+            }); 
+
+            if (currentAdminIndex === 0) {
+                document.querySelectorAll('.btn-delete').forEach(btn => { 
+                    btn.onclick = function() { 
+                        const targetUid = this.getAttribute('data-uid'); 
+                        showConfirm(`Admin ID1 muốn XÓA hoàn toàn ID ...${targetUid.slice(-4)}?`, () => { 
+                            // 1. Xóa khỏi node requests
+                            remove(ref(db, `settings/requests/${targetUid}`));
+                            // 2. Xóa khỏi mảng whitelist
+                            get(ref(db, 'settings/whitelist')).then(snap => {
+                                if (snap.exists()) {
+                                    let list = snap.val() || [];
+                                    let idx = list.indexOf(targetUid);
+                                    if (idx !== -1) {
+                                        list.splice(idx, 1);
+                                        update(ref(db, 'settings'), { whitelist: list });
+                                    }
+                                }
+                            });
+                        }); 
+                    }; 
+                });
+            }
+        }
+
         btnStop.onclick = () => { showConfirm("Bạn có chắc muốn DỪNG quét cho ID này?", () => { intervalInput.value = 0; const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: 0, timestamp: Date.now() }).then(() => { setSavedState(0); showNotice("Đã dừng quét! Robot A.94 sẽ bỏ qua ID này."); }); }); };
         searchBox.addEventListener('keyup', () => { const keyword = searchBox.value.toUpperCase().trim(); const rows = document.querySelectorAll('#flight-data tr'); let found = false; rows.forEach(row => { row.classList.remove('blink-row'); const flightNum = row.getAttribute('data-flight'); if (keyword && flightNum && flightNum.includes(keyword) && !found) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.classList.add('blink-row'); found = true; } }); });
 
