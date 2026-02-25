@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.32 - Smart Init</title>
+    <title>Radar A.33 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -123,7 +123,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.32 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.33 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -229,10 +229,14 @@
         const currentID = (() => { let id = localStorage.getItem('radar_device_unique_id'); if (!id) { id = "D-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 1000); localStorage.setItem('radar_device_unique_id', id); } return id; })();
         document.getElementById('my-device-id').innerText = `ID: ...${currentID.slice(-4)}`;
 
-        // Fix BFCache Safari (A.32) - Kiểm tra tránh conflict focus với Date Picker
+        // Fix BFCache Safari (A.33) - Dùng cờ trạng thái để quản lý việc chọn ngày an toàn trên iOS
+        let isDateFocused = false;
+        dateInput.addEventListener('focus', () => { isDateFocused = true; });
+        dateInput.addEventListener('blur', () => { isDateFocused = false; });
+
         function forceUpdateToday() { 
             const realToday = new Date(new Date().getTime() + 7*60*60*1000).toISOString().split('T')[0]; 
-            if (document.activeElement !== dateInput && dateInput.value !== realToday) { 
+            if (!isDateFocused && dateInput.value !== realToday) { 
                 dateInput.value = realToday; 
                 if (!isFirstLoad) { 
                     update(ref(db, `settings/requests/${currentID}`), { date: realToday }); 
@@ -406,8 +410,8 @@
                     isFirstLoad = false;
                 } else if (reqs[currentID]) {
                     const myReq = reqs[currentID];
-                    // Fix BFCache Safari (A.32) - Thêm điều kiện document.activeElement !== dateInput
-                    if (myReq.date && myReq.date !== dateInput.value && document.activeElement !== dateInput) { dateInput.value = myReq.date; }
+                    // Thay điều kiện bằng biến trạng thái focus thay vì check activeElement
+                    if (myReq.date && myReq.date !== dateInput.value && !isDateFocused) { dateInput.value = myReq.date; }
                     
                     if (parseInt(myReq.interval) === 0 && parseInt(intervalInput.value) !== 0) { intervalInput.value = 0; setSavedState(0); }
                 }
