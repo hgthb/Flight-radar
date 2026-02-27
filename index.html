@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.35 - Smart Init</title>
+    <title>Radar A.36 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -84,6 +84,10 @@
         .st-yellow-blink { background-color: #ffffff; color: #ffcc00; border: 1px solid #000000; animation: flash-yellow 0.4s infinite; font-weight: 900; }
         @keyframes flash-yellow { 0%, 100% { color: #ffcc00; text-shadow: 0 0 5px #f59e0b, 0 0 10px #d97706; opacity: 1; } 50% { color: #94a3b8; text-shadow: none; opacity: 0.5; } }
 
+        /* Hiệu ứng đỏ sáng rực nhấp nháy cho G-CL */
+        .st-red-blink { background-color: #ffffff; color: #ff0000; border: 1px solid #000000; animation: flash-red 0.4s infinite; font-weight: 900; }
+        @keyframes flash-red { 0%, 100% { color: #ff0000; text-shadow: 0 0 5px #ef4444, 0 0 10px #dc2626; opacity: 1; } 50% { color: #94a3b8; text-shadow: none; opacity: 0.5; } }
+
         @keyframes blinker { 50% { opacity: 0.6; } }
         @keyframes highlightRow { 0% { background-color: #fef08a; } 50% { background-color: transparent; } 100% { background-color: #fef08a; } }
         .blink-row { animation: highlightRow 1s infinite; }
@@ -128,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.35 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.36 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -371,6 +375,7 @@
                     const upStatus = statusText.toUpperCase();
                     
                     if (upStatus.includes("LC-IN") || upStatus.includes("L-BD")) stClass = "st-yellow-blink";
+                    else if (upStatus.includes("G-CL")) stClass = "st-red-blink";
                     else if (upStatus.includes("LANDED")) stClass = "st-completed";
                     else if (upStatus.includes("FLYING")) stClass = "st-flying";
                     else if (upStatus.includes("ACTIVE") || upStatus.includes("DEPARTED")) stClass = "st-live";
