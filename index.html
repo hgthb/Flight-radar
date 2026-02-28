@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.37 - Smart Init</title>
+    <title>Radar A.38 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -126,7 +126,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.37 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.38 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -295,11 +295,13 @@
                 }; 
             }); 
 
-            // Xử lý sự kiện click HỒI PHỤC (Thực hiện ngay với mức mặc định 10p)
+            // Xử lý sự kiện click HỒI PHỤC (Thực hiện ngay với mức mặc định 10p, sau đó refresh trang)
             document.querySelectorAll('.btn-recover').forEach(btn => { 
                 btn.onclick = function() { 
                     const targetUid = this.getAttribute('data-uid'); 
-                    update(ref(db, `settings/requests/${targetUid}`), { interval: 10 }); 
+                    update(ref(db, `settings/requests/${targetUid}`), { interval: 10 }).then(() => {
+                        window.location.reload();
+                    }); 
                 }; 
             });
 
