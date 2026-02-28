@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.39 - Smart Init</title>
+    <title>Radar A.40 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -80,9 +80,10 @@
         .st-flying { background-color: #ffff00; color: #16a34a; border: 1px solid #16a34a; animation: blinker 2s infinite; font-size: 13.1px; font-weight: 900; }
         .st-unknown { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; } 
         
-        /* Hiệu ứng nhấp nháy chữ đỏ nền trắng viền xanh blue */
+        /* Hiệu ứng chữ đỏ nền trắng viền xanh blue */
         .st-urgent-blink { background-color: #ffffff; color: #ff0000; border: 1px solid #0000ff; font-weight: 900; animation: blinker-color 0.4s infinite; }
-        
+        .st-red-blue { background-color: #ffffff; color: #ff0000; border: 1px solid #0000ff; font-weight: 900; }
+
         /* Hiệu ứng vàng/đỏ sáng rực nhấp nháy, KHÔNG đổ bóng, in đậm, nền trắng, viền đen */
         .st-yellow-blink { background-color: #ffffff; color: #ff9900; border: 1px solid #000000; font-weight: 900; animation: blinker-color 0.4s infinite; }
         .st-red-blink { background-color: #ffffff; color: #ff0000; border: 1px solid #000000; font-weight: 900; animation: blinker-color 0.4s infinite; }
@@ -132,7 +133,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.39 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.40 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -382,6 +383,7 @@
                     const upStatus = statusText.toUpperCase();
                     
                     if (upStatus.includes("LAST BOARDING") || upStatus.includes("LAST CHECK-IN") || upStatus.includes("GATE CLOSED")) stClass = "st-urgent-blink";
+                    else if (upStatus.includes("BOARDING") || upStatus.includes("CHECK-IN")) stClass = "st-red-blue";
                     else if (upStatus.includes("LC-IN") || upStatus.includes("L-BD")) stClass = "st-yellow-blink";
                     else if (upStatus.includes("G-CL")) stClass = "st-red-blink";
                     else if (upStatus.includes("LANDED")) stClass = "st-completed";
