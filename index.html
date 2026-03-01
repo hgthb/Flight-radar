@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.40 - Smart Init</title>
+    <title>Radar A.41 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -133,7 +133,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.40 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.41 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -382,14 +382,17 @@
                     let statusText = f.status || "UNKNOWN"; let icon = f.icon || "✈️"; let stClass = "st-plan";
                     const upStatus = statusText.toUpperCase();
                     
-                    if (upStatus.includes("LAST BOARDING") || upStatus.includes("LAST CHECK-IN") || upStatus.includes("GATE CLOSED")) stClass = "st-urgent-blink";
-                    else if (upStatus.includes("BOARDING") || upStatus.includes("CHECK-IN")) stClass = "st-red-blue";
-                    else if (upStatus.includes("LC-IN") || upStatus.includes("L-BD")) stClass = "st-yellow-blink";
-                    else if (upStatus.includes("G-CL")) stClass = "st-red-blink";
-                    else if (upStatus.includes("LANDED")) stClass = "st-completed";
-                    else if (upStatus.includes("FLYING")) stClass = "st-flying";
-                    else if (upStatus.includes("ACTIVE") || upStatus.includes("DEPARTED")) stClass = "st-live";
-                    else if (upStatus.includes("UNKNOWN") || upStatus.includes("CANCEL")) stClass = "st-unknown";
+                    if (upStatus.includes("SCHEDULED")) {
+                        stClass = "st-plan";
+                    } else if (upStatus.includes("LANDED")) {
+                        stClass = "st-completed";
+                    } else if (upStatus.includes("FLYING")) {
+                        stClass = "st-flying";
+                    } else if (upStatus.includes("LAST BOARDING") || upStatus.includes("LAST CHECK-IN") || upStatus.includes("GATE CLOSED")) {
+                        stClass = "st-urgent-blink";
+                    } else {
+                        stClass = "st-red-blue";
+                    }
 
                     let depDisplay = ""; if (f.dep_real && f.dep_real !== "--:--") { depDisplay = `<span class="real-time">A: ${f.dep_real}</span>`; } else if (f.dep_est && f.dep_est !== "--:--") { depDisplay = `<span class="real-time">E: ${f.dep_est}</span>`; }
                     let arrDisplay = ""; if (f.arr_real && f.arr_real !== "--:--") { arrDisplay = `<span class="real-time">A: ${f.arr_real}</span>`; } else if (f.arr_est && f.arr_est !== "--:--") { arrDisplay = `<span class="real-time">E: ${f.arr_est}</span>`; }
