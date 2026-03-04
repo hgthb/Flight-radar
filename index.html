@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Radar A.41 - Smart Init</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Radar A.42 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -71,7 +76,6 @@
         .time-group { display: flex; flex-direction: column; line-height: 1.3; min-width: 60px; font-weight: bold; } 
         .real-time { margin-top: 4px; font-weight: 900; color: #16a34a; font-size: 13px; }
         
-        /* ĐÃ CHỈNH SỬA BÊN DƯỚI ĐỂ XUỐNG DÒNG */
         .status-pill { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; text-align: center; min-width: 80px; margin-left: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: normal !important; word-wrap: break-word; word-break: break-word; line-height: 1.3; }
         
         .st-completed { background-color: #dcfce3; color: #166534; border: 1px solid #bbf7d0; } 
@@ -80,11 +84,9 @@
         .st-flying { background-color: #ffff00; color: #16a34a; border: 1px solid #16a34a; animation: blinker 2s infinite; font-size: 13.1px; font-weight: 900; }
         .st-unknown { background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; } 
         
-        /* Hiệu ứng chữ đỏ nền trắng viền xanh blue */
         .st-urgent-blink { background-color: #ffffff; color: #ff0000; border: 1px solid #0000ff; font-weight: 900; animation: blinker-color 0.4s infinite; }
         .st-red-blue { background-color: #ffffff; color: #ff0000; border: 1px solid #0000ff; font-weight: 900; }
 
-        /* Hiệu ứng vàng/đỏ sáng rực nhấp nháy, KHÔNG đổ bóng, in đậm, nền trắng, viền đen */
         .st-yellow-blink { background-color: #ffffff; color: #ff9900; border: 1px solid #000000; font-weight: 900; animation: blinker-color 0.4s infinite; }
         .st-red-blink { background-color: #ffffff; color: #ff0000; border: 1px solid #000000; font-weight: 900; animation: blinker-color 0.4s infinite; }
         @keyframes blinker-color { 50% { color: transparent; } }
@@ -116,7 +118,6 @@
         .about-text { font-size: 14px; color: #334155; font-weight: 800; margin: 8px 0; }
         .about-highlight { color: #0284c7; font-weight: 900; }
 
-        /* --- RESPONSIVE TABLE FOR MOBILE --- */
         @media (max-width: 600px) {
             table { font-size: 12px; }
             th { padding: 8px 2px; font-size: 9px; }
@@ -133,7 +134,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.41 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.42 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
@@ -231,15 +232,13 @@
         let downloadMode = 'MANUAL';
         let isFirstLoad = true;
         let isAdminUser = false;
-        let currentAdminIndex = -1; // Biến lưu index của Admin hiện tại
+        let currentAdminIndex = -1;
 
-        // Init Date
         dateInput.value = today;
 
         const currentID = (() => { let id = localStorage.getItem('radar_device_unique_id'); if (!id) { id = "D-" + Date.now().toString().slice(-6) + "-" + Math.floor(Math.random() * 1000); localStorage.setItem('radar_device_unique_id', id); } return id; })();
         document.getElementById('my-device-id').innerText = `ID: ...${currentID.slice(-4)}`;
 
-        // Fix BFCache Safari (A.33) - Dùng cờ trạng thái để quản lý việc chọn ngày an toàn trên iOS
         let isDateFocused = false;
         dateInput.addEventListener('focus', () => { isDateFocused = true; });
         dateInput.addEventListener('blur', () => { isDateFocused = false; });
@@ -277,14 +276,12 @@
                 const statusColor = interval > 0 ? "#16a34a" : "#64748b"; 
                 let actionBtn = ""; 
                 
-                // Toggle DỪNG / HỒI PHỤC (bấm nhảy ngay không cần Confirm)
                 if (interval > 0) { 
                     actionBtn = `<button class="btn-kill" data-uid="${uid}" style="background:#ef4444; color:white; border:none; padding:2px 8px; border-radius:3px; font-size:9px; cursor:pointer; font-weight:bold;">DỪNG</button>`; 
                 } else { 
                     actionBtn = `<button class="btn-recover" data-uid="${uid}" style="background:#16a34a; color:white; border:none; padding:2px 8px; border-radius:3px; font-size:9px; cursor:pointer; font-weight:bold;">HỒI PHỤC</button>`; 
                 } 
 
-                // Nút XÓA: Chỉ dành cho ID1 và ẨN ở dòng của chính ID1 để tránh tự xóa
                 if (currentAdminIndex === 0 && uid !== currentID) {
                     actionBtn += `<button class="btn-delete" data-uid="${uid}" style="background:#b91c1c; color:white; border:none; padding:2px 8px; border-radius:3px; font-size:9px; cursor:pointer; font-weight:bold; margin-left:4px;">XÓA</button>`;
                 }
@@ -294,7 +291,6 @@
             
             adminList.innerHTML = html || "<div style='text-align:center; color:#64748b; font-size:10px; font-weight:bold;'>Không có ID nào đang chạy</div>"; 
             
-            // Xử lý sự kiện click DỪNG (Thực hiện ngay)
             document.querySelectorAll('.btn-kill').forEach(btn => { 
                 btn.onclick = function() { 
                     const targetUid = this.getAttribute('data-uid'); 
@@ -302,7 +298,6 @@
                 }; 
             }); 
 
-            // Xử lý sự kiện click HỒI PHỤC (Thực hiện ngay với mức mặc định 10p, sau đó refresh trang)
             document.querySelectorAll('.btn-recover').forEach(btn => { 
                 btn.onclick = function() { 
                     const targetUid = this.getAttribute('data-uid'); 
@@ -312,7 +307,6 @@
                 }; 
             });
 
-            // Xử lý sự kiện click XÓA (Thực hiện ngay)
             if (currentAdminIndex === 0) {
                 document.querySelectorAll('.btn-delete').forEach(btn => { 
                     btn.onclick = function() { 
@@ -435,7 +429,6 @@
                     isFirstLoad = false;
                 } else if (reqs[currentID]) {
                     const myReq = reqs[currentID];
-                    // Thay điều kiện bằng biến trạng thái focus thay vì check activeElement
                     if (myReq.date && myReq.date !== dateInput.value && !isDateFocused) { dateInput.value = myReq.date; }
                     
                     if (parseInt(myReq.interval) === 0 && parseInt(intervalInput.value) !== 0) { intervalInput.value = 0; setSavedState(0); }
@@ -450,6 +443,15 @@
         const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
         btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Hàng đợi trống!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("Không có dữ liệu!"); btnDownload.innerText = "⬇ TẢI EXCEL"; return; } exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ XONG"; setTimeout(() => { btnDownload.innerText = "⬇ TẢI EXCEL"; }, 3000); }); };
         function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ ĐÃ XONG"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) exportToCSV(exportList, `Radar_${airport}_Month_${targetMonthStr}.csv`); if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ ĐÃ XONG"; } }); } }
+
+        // ĐĂNG KÝ SERVICE WORKER (THÊM MỚI Ở BẢN A.42)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Radar A.42: PWA Ready!'))
+                    .catch(err => console.log('PWA Error:', err));
+            });
+        }
     </script>
 </body>
 </html>
