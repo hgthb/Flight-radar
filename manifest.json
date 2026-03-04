@@ -9,10 +9,10 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./indexF41.html",
+  "start_url": "/Flight-radar/index.html",
   "background_color": "#8c7a6b",
   "display": "standalone",
-  "scope": "./",
+  "scope": "/Flight-radar/",
   "theme_color": "#0284c7",
   "description": "Hệ thống theo dõi radar hàng không phiên bản A.42"
 }
