@@ -1,0 +1,18 @@
+{
+  "short_name": "Radar A.42",
+  "name": "Radar Flight Monitoring A.42",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/784/784867.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./indexF41.html",
+  "background_color": "#8c7a6b",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#0284c7",
+  "description": "Hệ thống theo dõi radar hàng không phiên bản A.42"
+}
