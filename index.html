@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar F.69 - Smart Init</title>
+    <title>Radar F.70 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR F.69 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR F.70 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -158,7 +158,7 @@
             </div>
 
             <div class="settings-group" style="flex: 0.8; min-width: 60px;">
-                <label id="lbl-scan-mode" style="cursor: pointer; color: #ff0055; font-weight: 900; border-bottom: 1px dashed #ff0055; padding-bottom: 2px; text-align: center;">SCAN: ONCE 🔄</label>
+                <label id="lbl-scan-mode" style="cursor: pointer; color: #ff0055; font-weight: 900; border-bottom: 1px dashed #ff0055; padding-bottom: 2px; text-align: center;">SCAN 🔄</label>
                 <button id="btn-flash-scan">ONCE</button>
             </div>
 
@@ -434,7 +434,6 @@
         lblScanMode.onclick = () => {
             if (scanMode === 'ONCE') {
                 scanMode = 'FREQ';
-                lblScanMode.innerText = "SCAN: FREQ 🔄";
                 lblScanMode.style.color = "#16a34a";
                 lblScanMode.style.borderBottomColor = "#16a34a";
                 btnFlashScan.innerText = "FREQ";
@@ -443,7 +442,6 @@
                 btnFlashScan.style.animation = "none";
             } else {
                 scanMode = 'ONCE';
-                lblScanMode.innerText = "SCAN: ONCE 🔄";
                 lblScanMode.style.color = "#ff0055";
                 lblScanMode.style.borderBottomColor = "#ff0055";
                 btnFlashScan.innerText = "ONCE";
@@ -559,7 +557,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar F.69: PWA Ready!'))
+                    .then(reg => console.log('Radar F.70: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
