@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar A.46 - Smart Init</title>
+    <title>Radar A.47 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.46 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.47 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -154,7 +154,7 @@
 
             <div class="settings-group" style="flex: 2; min-width: 130px;">
                 <label>CODESHARE</label>
-                <input type="text" id="codeshare-input" placeholder="Ex: VN, BL, 0V..." style="text-align: left; font-family: monospace; color: #b45309; padding-left: 8px;">
+                <input type="text" id="codeshare-input" placeholder="Ex: VN, BL, 0V..." style="text-align: left; font-family: monospace; color: #b45309; padding-left: 8px; text-transform: uppercase;">
             </div>
 
             <div class="settings-group" style="flex: 0.8; min-width: 60px;">
@@ -283,6 +283,10 @@
         function setSavedState(intervalVal) { const val = parseInt(intervalVal); if (val <= 0) { intervalInput.className = 'interval-stopped'; } else { intervalInput.className = 'interval-active'; } btnSave.innerText = "QUEUED"; btnSave.disabled = true; }
         airportInput.addEventListener('input', setEditingState); dateInput.addEventListener('input', setEditingState); intervalInput.addEventListener('input', setEditingState);
         
+        codeshareInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+
         codeshareInput.addEventListener('change', () => {
             update(ref(db, 'settings'), { codeshare_groups: codeshareInput.value.trim() }).then(() => {
                 showNotice("Codeshare config saved!");
@@ -497,7 +501,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar A.46: PWA Ready!'))
+                    .then(reg => console.log('Radar A.47: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
