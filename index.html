@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar A.42 - Smart Init</title>
+    <title>Radar A.43 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -23,7 +23,7 @@
         .control-panel { background: rgba(255, 255, 255, 0.4); padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #c8a98b; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
         .settings-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 70px; }
         .control-panel label { font-size: 10px; color: #475569; font-weight: 800; text-align: center; text-transform: uppercase; white-space: nowrap; }
-        .control-panel input, .control-panel button, .mode-toggle { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 800; border: 1px solid #cbd5e1; margin: 0; }
+        .control-panel input, .control-panel button { height: 38px; width: 100%; border-radius: 4px; font-size: 13px; font-weight: 800; border: 1px solid #cbd5e1; margin: 0; }
         .control-panel input { padding: 0 5px; background: #f8fafc; color: #0f172a; text-align: center; transition: all 0.3s; max-height: 38px; box-sizing: border-box; }
         .control-panel input[type="date"] { -webkit-appearance: none; appearance: none; }
         
@@ -34,10 +34,8 @@
         button { cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; border: none; font-weight: 800; }
         #btn-save { background: #10b981; transition: background 0.3s; color: white; }
         #btn-save:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border: 1px solid #cbd5e1; }
-        #btn-stop { background: #ef4444; color: white; border: 1px solid #b91c1c; }
         #btn-flash-scan { border: 1px solid #ff99bb; background: #ff0055; animation: pulse-neon 2s infinite; color: white; }
-        .mode-toggle { display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #475569; cursor: pointer; border: 1px solid #cbd5e1; font-weight: 800; }
-        .mode-active { background: #3b82f6; color: white; border-color: #2563eb; }
+        
         #btn-download { background: #f59e0b; color: white; border: 1px solid #d97706; }
         #btn-download:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: #cbd5e1; }
         .group-download { flex: 1; min-width: 80px; }
@@ -134,19 +132,39 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.42 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.43 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
-            <div class="settings-group"><label>Sân Bay</label><input type="text" id="airport-code" placeholder="PXU"></div>
-            <div class="settings-group" style="flex: 1.5;"><label>Ngày</label><input type="date" id="scan-date"></div>
-            <div class="settings-group" style="flex: 0.7; min-width: 50px; margin-left: 5px;"><label>Phút</label><input type="number" id="scan-interval" value="10"></div>
-            
-            <div class="settings-group" style="flex: 2;"><label>Action</label><button id="btn-save">QUEUE</button></div>
-            <div class="settings-group" style="flex: 1;"><label>Stop</label><button id="btn-stop" title="Dừng ID này">⛔</button></div>
+            <div class="settings-group" style="flex: 1; min-width: 60px;">
+                <label>Sân Bay</label>
+                <input type="text" id="airport-code" placeholder="PXU">
+            </div>
+            <div class="settings-group" style="flex: 1.5; min-width: 110px;">
+                <label>Ngày</label>
+                <input type="date" id="scan-date">
+            </div>
+            <div class="settings-group" style="flex: 0.7; min-width: 50px;">
+                <label>Phút</label>
+                <input type="number" id="scan-interval" value="10" title="Nhập 0 để dừng quét">
+            </div>
+            <div class="settings-group" style="flex: 1.2; min-width: 70px;">
+                <label>Action</label>
+                <button id="btn-save">QUEUE</button>
+            </div>
 
-            <div class="settings-group"><label>Scan</label><button id="btn-flash-scan">QUÉT</button></div>
-            <div class="settings-group"><label>Chế độ</label><div id="mode-toggle" class="mode-toggle">THỦ CÔNG</div></div>
-            <div class="settings-group group-download"><label>Dữ liệu</label><button id="btn-download">⬇ TẢI EXCEL</button></div>
+            <div class="settings-group" style="flex: 3; min-width: 100%;">
+                <label>Liên Danh (Codeshare)</label>
+                <input type="text" id="codeshare-input" placeholder="VD: VN, BL, 0V; VJ, FD" style="text-align: left; font-family: monospace; color: #b45309;">
+            </div>
+
+            <div class="settings-group" style="flex: 1; min-width: 70px;">
+                <label>Scan</label>
+                <button id="btn-flash-scan">QUÉT</button>
+            </div>
+            <div class="settings-group group-download" style="flex: 1.5; min-width: 110px;">
+                <label id="lbl-data-mode" style="cursor: pointer; color: #0284c7; font-weight: 900; border-bottom: 1px dashed #0284c7; padding-bottom: 2px; text-align: center;">DATA: MANUAL 🔄</label>
+                <button id="btn-download">⬇ EXCEL</button>
+            </div>
         </div>
 
         <div id="admin-panel">
@@ -213,12 +231,12 @@
         const dateInput = document.getElementById('scan-date');
         const intervalInput = document.getElementById('scan-interval');
         const btnSave = document.getElementById('btn-save');
-        const btnStop = document.getElementById('btn-stop');
         const btnFlashScan = document.getElementById('btn-flash-scan');
-        const modeToggle = document.getElementById('mode-toggle');
+        const modeToggle = document.getElementById('lbl-data-mode'); // Gán label thành công tắc đổi chế độ
         const btnDownload = document.getElementById('btn-download');
         const searchBox = document.getElementById('search-box');
         const btnTodayToggle = document.getElementById('btn-today-toggle');
+        const codeshareInput = document.getElementById('codeshare-input'); // Ô nhập Codeshare mới
         
         const idBadge = document.getElementById('id-badge');
         const adminPanel = document.getElementById('admin-panel');
@@ -264,7 +282,14 @@
         function setSavedState(intervalVal) { const val = parseInt(intervalVal); if (val <= 0) { intervalInput.className = 'interval-stopped'; } else { intervalInput.className = 'interval-active'; } btnSave.innerText = "QUEUED"; btnSave.disabled = true; }
         airportInput.addEventListener('input', setEditingState); dateInput.addEventListener('input', setEditingState); intervalInput.addEventListener('input', setEditingState);
         
-        btnSave.onclick = () => { const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; const intervalRaw = intervalInput.value; if (!airport || !date || !intervalRaw) { showNotice("Vui lòng nhập đầy đủ Sân bay, Ngày và Số phút!"); return; } const interval = parseInt(intervalRaw); update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: interval, timestamp: Date.now() }).then(() => { setSavedState(interval); fetchDataByInput(); }); };
+        // Cập nhật cấu hình Liên Danh lên Firebase khi rời chuột / enter (change event)
+        codeshareInput.addEventListener('change', () => {
+            update(ref(db, 'settings'), { codeshare_groups: codeshareInput.value.trim() }).then(() => {
+                showNotice("Đã lưu cấu hình Liên Danh!");
+            });
+        });
+
+        btnSave.onclick = () => { const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; const intervalRaw = intervalInput.value; if (!airport || !date || !intervalRaw) { showNotice("Vui lòng nhập đầy đủ Sân bay, Ngày và Số phút!"); return; } const interval = parseInt(intervalRaw); update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: interval, timestamp: Date.now() }).then(() => { setSavedState(interval); fetchDataByInput(); if (interval === 0) showNotice("Đã ngắt quét! (Robot sẽ bỏ qua ID này)."); }); };
         function checkAccessAndAdmin(whitelist) { let list = whitelist || []; let idx = list.indexOf(currentID); if (idx === -1) { if (list.length >= 4) { showNotice("Over limit !"); document.querySelector('.control-panel').style.opacity = "0.5"; document.querySelectorAll('input, button').forEach(el => el.disabled = true); document.getElementById('active-queue').innerText = "ACCESS DENIED"; return false; } else { list.push(currentID); idx = list.length - 1; update(ref(db, 'settings'), { whitelist: list }); } } isAdminUser = (idx !== -1 && idx < 2); currentAdminIndex = idx; idBadge.style.display = "inline-block"; idBadge.innerText = `ID${idx + 1}`; idBadge.className = "id-badge " + (isAdminUser ? "badge-admin" : "badge-guest"); adminPanel.style.display = isAdminUser ? "block" : "none"; return true; }
         
         function renderAdminList(requests) { 
@@ -327,7 +352,6 @@
             }
         }
 
-        btnStop.onclick = () => { showConfirm("Bạn có chắc muốn DỪNG quét cho ID này?", () => { intervalInput.value = 0; const airport = airportInput.value.toUpperCase().trim(); const date = dateInput.value; update(ref(db, `settings/requests/${currentID}`), { code: airport, date: date, interval: 0, timestamp: Date.now() }).then(() => { setSavedState(0); showNotice("Đã dừng quét! Robot A.94 sẽ bỏ qua ID này."); }); }); };
         searchBox.addEventListener('keyup', () => { const keyword = searchBox.value.toUpperCase().trim(); const rows = document.querySelectorAll('#flight-data tr'); let found = false; rows.forEach(row => { row.classList.remove('blink-row'); const flightNum = row.getAttribute('data-flight'); if (keyword && flightNum && flightNum.includes(keyword) && !found) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.classList.add('blink-row'); found = true; } }); });
 
         function updateTodayButton() {
@@ -408,6 +432,12 @@
         onValue(ref(db, 'settings'), snap => {
             if (snap.exists()) {
                 const s = snap.val(); const hasAccess = checkAccessAndAdmin(s.whitelist); if (!hasAccess) return;
+                
+                // Đồng bộ hóa ô Liên Danh nếu Firebase có thay đổi
+                if (s.codeshare_groups !== undefined && document.activeElement !== codeshareInput) {
+                    codeshareInput.value = s.codeshare_groups;
+                }
+
                 renderAdminList(s.requests); const reqs = s.requests || {};
                 
                 if (isFirstLoad) {
@@ -439,16 +469,37 @@
         });
         
         dateInput.onchange = fetchDataByInput; airportInput.oninput = fetchDataByInput;
-        modeToggle.onclick = () => { if (downloadMode === 'MANUAL') { downloadMode = 'AUTO'; modeToggle.innerText = "TỰ ĐỘNG"; modeToggle.classList.add("mode-active"); btnDownload.innerText = "⏳ CHỜ (1-10)"; btnDownload.disabled = true; localStorage.setItem('dl_mode', 'AUTO'); checkAutoDownloadAndClean(); } else { downloadMode = 'MANUAL'; modeToggle.innerText = "THỦ CÔNG"; modeToggle.classList.remove("mode-active"); btnDownload.innerText = "⬇ TẢI EXCEL"; btnDownload.disabled = false; localStorage.setItem('dl_mode', 'MANUAL'); } };
+        
+        // Sự kiện click gạt chế độ trên Label Data
+        modeToggle.onclick = () => { 
+            if (downloadMode === 'MANUAL') { 
+                downloadMode = 'AUTO'; 
+                modeToggle.innerText = "DATA: AUTO 🔄"; 
+                modeToggle.style.color = "#dc2626"; 
+                modeToggle.style.borderBottomColor = "#dc2626";
+                btnDownload.innerText = "⏳ CHỜ (1-10)"; 
+                btnDownload.disabled = true; 
+                localStorage.setItem('dl_mode', 'AUTO'); 
+                checkAutoDownloadAndClean(); 
+            } else { 
+                downloadMode = 'MANUAL'; 
+                modeToggle.innerText = "DATA: MANUAL 🔄"; 
+                modeToggle.style.color = "#0284c7"; 
+                modeToggle.style.borderBottomColor = "#0284c7";
+                btnDownload.innerText = "⬇ EXCEL"; 
+                btnDownload.disabled = false; 
+                localStorage.setItem('dl_mode', 'MANUAL'); 
+            } 
+        };
         const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
-        btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Hàng đợi trống!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("Không có dữ liệu!"); btnDownload.innerText = "⬇ TẢI EXCEL"; return; } exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ XONG"; setTimeout(() => { btnDownload.innerText = "⬇ TẢI EXCEL"; }, 3000); }); };
+        
+        btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Hàng đợi trống!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("Không có dữ liệu!"); btnDownload.innerText = "⬇ EXCEL"; return; } exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ XONG"; setTimeout(() => { btnDownload.innerText = "⬇ EXCEL"; }, 3000); }); };
         function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ ĐÃ XONG"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) exportToCSV(exportList, `Radar_${airport}_Month_${targetMonthStr}.csv`); if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ ĐÃ XONG"; } }); } }
 
-        // ĐĂNG KÝ SERVICE WORKER (THÊM MỚI Ở BẢN A.42)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar A.42: PWA Ready!'))
+                    .then(reg => console.log('Radar A.43: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
