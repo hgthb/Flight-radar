@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar F.71 - Smart Init</title>
+    <title>Radar F.72 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR F.71 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR F.72 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -431,8 +431,7 @@
 
         btnFlashScan.onclick = () => { 
             btnFlashScan.innerText = "⏳..."; 
-            update(ref(db, 'settings'), { force_scan: true });
-            update(ref(db, `settings/requests/${currentID}`), { is_done: false });
+            update(ref(db, `settings/requests/${currentID}`), { force_scan: true, is_done: false });
             setTimeout(() => btnFlashScan.innerText = "ONCE", 10000); 
         };
         
@@ -532,7 +531,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar F.71: PWA Ready!'))
+                    .then(reg => console.log('Radar F.72: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
