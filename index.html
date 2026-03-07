@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar F.70 - Smart Init</title>
+    <title>Radar F.71 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR F.70 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR F.71 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -158,7 +158,7 @@
             </div>
 
             <div class="settings-group" style="flex: 0.8; min-width: 60px;">
-                <label id="lbl-scan-mode" style="cursor: pointer; color: #ff0055; font-weight: 900; border-bottom: 1px dashed #ff0055; padding-bottom: 2px; text-align: center;">SCAN 🔄</label>
+                <label id="lbl-scan-mode" style="color: #ff0055; font-weight: 900; padding-bottom: 2px; text-align: center;">SCAN 🔄</label>
                 <button id="btn-flash-scan">ONCE</button>
             </div>
 
@@ -233,7 +233,6 @@
         const intervalInput = document.getElementById('scan-interval');
         const btnSave = document.getElementById('btn-save');
         const btnFlashScan = document.getElementById('btn-flash-scan');
-        const lblScanMode = document.getElementById('lbl-scan-mode');
         const modeToggle = document.getElementById('lbl-data-mode'); 
         const btnDownload = document.getElementById('btn-download');
         const searchBox = document.getElementById('search-box');
@@ -430,36 +429,11 @@
             listDiv.innerHTML = html;
         }
 
-        let scanMode = 'ONCE';
-        lblScanMode.onclick = () => {
-            if (scanMode === 'ONCE') {
-                scanMode = 'FREQ';
-                lblScanMode.style.color = "#16a34a";
-                lblScanMode.style.borderBottomColor = "#16a34a";
-                btnFlashScan.innerText = "FREQ";
-                btnFlashScan.style.background = "#16a34a";
-                btnFlashScan.style.borderColor = "#10b981";
-                btnFlashScan.style.animation = "none";
-            } else {
-                scanMode = 'ONCE';
-                lblScanMode.style.color = "#ff0055";
-                lblScanMode.style.borderBottomColor = "#ff0055";
-                btnFlashScan.innerText = "ONCE";
-                btnFlashScan.style.background = "#ff0055";
-                btnFlashScan.style.borderColor = "#ff99bb";
-                btnFlashScan.style.animation = "pulse-neon 2s infinite";
-            }
-        };
-
-        btnFlashScan.onclick = () => {
-            btnFlashScan.innerText = "⏳...";
-            if (scanMode === 'ONCE') {
-                update(ref(db, 'settings'), { force_scan: true });
-                setTimeout(() => btnFlashScan.innerText = "ONCE", 10000);
-            } else {
-                update(ref(db, `settings/requests/${currentID}`), { is_done: false });
-                setTimeout(() => btnFlashScan.innerText = "FREQ", 3000);
-            }
+        btnFlashScan.onclick = () => { 
+            btnFlashScan.innerText = "⏳..."; 
+            update(ref(db, 'settings'), { force_scan: true });
+            update(ref(db, `settings/requests/${currentID}`), { is_done: false });
+            setTimeout(() => btnFlashScan.innerText = "ONCE", 10000); 
         };
         
         onValue(ref(db, 'settings'), snap => {
@@ -524,6 +498,7 @@
         };
         const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
         
+        // HÀM XUẤT CSV ĐƯỢC THÊM VÀO ĐÂY
         function exportToCSV(dataList, filename) {
             if (!dataList || !dataList.length) return;
             const headers = ['date', 'flight', 'reg', 'type', 'o_iata', 'd_iata', 'aircraft', 'dep_sched', 'arr_sched', 'dep_est', 'arr_est', 'dep_real', 'arr_real', 'status'];
@@ -557,7 +532,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar F.70: PWA Ready!'))
+                    .then(reg => console.log('Radar F.71: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
