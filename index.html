@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar F.72 - Smart Init</title>
+    <title>Radar F.68 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR F.72 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR F.68 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -497,11 +497,10 @@
         };
         const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
         
-        // HÀM XUẤT CSV ĐƯỢC THÊM VÀO ĐÂY
         function exportToCSV(dataList, filename) {
             if (!dataList || !dataList.length) return;
             const headers = ['date', 'flight', 'reg', 'type', 'o_iata', 'd_iata', 'aircraft', 'dep_sched', 'arr_sched', 'dep_est', 'arr_est', 'dep_real', 'arr_real', 'status'];
-            let csvContent = "\uFEFF"; // Ký tự giúp Excel nhận diện đúng tiếng Việt (UTF-8)
+            let csvContent = "\uFEFF"; 
             csvContent += headers.join(',') + '\r\n';
             dataList.forEach(row => {
                 let rowData = headers.map(header => {
@@ -525,13 +524,13 @@
             document.body.removeChild(link);
         }
 
-        btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Queue is empty!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("No data!"); btnDownload.innerText = "⬇ EXCEL"; return; } exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ DONE ✔️"; setTimeout(() => { btnDownload.innerText = "⬇ EXCEL"; }, 3000); }); };
-        function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ DONE ✔️"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) exportToCSV(exportList, `Radar_${airport}_Month_${targetMonthStr}.csv`); if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ DONE ✔️"; } }); } }
+        btnDownload.onclick = () => { const queueText = document.getElementById('active-queue').innerText; const airports = queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3); if (airports.length === 0) { showNotice("Queue is empty!"); return; } btnDownload.innerText = "⏳..."; const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); Promise.all(promises).then(snapshots => { let exportList = []; snapshots.forEach(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); Object.keys(allData).forEach(dateKey => { const dailyFlights = allData[dateKey]; Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); }); } }); if (exportList.length === 0) { showNotice("No data!"); btnDownload.innerText = "⬇ EXCEL"; return; } exportList.sort((a,b) => a.raw_sort_time - b.raw_sort_time); exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); btnDownload.innerText = "✅ DONE ✔️"; setTimeout(() => { btnDownload.innerText = "⬇ EXCEL"; }, 3000); }); };
+        function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ DONE ✔️"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) { exportList.sort((a,b) => a.raw_sort_time - b.raw_sort_time); exportToCSV(exportList, `Radar_${airport}_Month_${targetMonthStr}.csv`); } if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ DONE ✔️"; } }); } }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar F.72: PWA Ready!'))
+                    .then(reg => console.log('Radar F.68: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
