@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar A.69 - Smart Init</title>
+    <title>Radar A.74 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.69 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.74 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -525,25 +525,21 @@
         }
 
         btnDownload.onclick = () => { 
-            const queueText = document.getElementById('active-queue').innerText; 
-            const airports = [...new Set(queueText.split(' ➜ ').map(s => s.split(':')[1]).filter(s => s && s.length === 3))]; 
-            if (airports.length === 0) { showNotice("Queue is empty!"); return; } 
+            const myAirport = airportInput.value.toUpperCase().trim(); 
+            if (!myAirport) { showNotice("Please enter an airport!"); return; } 
             btnDownload.innerText = "⏳..."; 
-            const promises = airports.map(code => get(ref(db, `database_flights/${code}`))); 
-            Promise.all(promises).then(snapshots => { 
+            get(ref(db, `database_flights/${myAirport}`)).then(snapshot => { 
                 let exportList = []; 
-                snapshots.forEach(snapshot => { 
-                    if (snapshot.exists()) { 
-                        const allData = snapshot.val(); 
-                        Object.keys(allData).forEach(dateKey => { 
-                            const dailyFlights = allData[dateKey]; 
-                            Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); 
-                        }); 
-                    } 
-                }); 
+                if (snapshot.exists()) { 
+                    const allData = snapshot.val(); 
+                    Object.keys(allData).forEach(dateKey => { 
+                        const dailyFlights = allData[dateKey]; 
+                        Object.values(dailyFlights).forEach(f => { f.date = dateKey; exportList.push(f); }); 
+                    }); 
+                } 
                 if (exportList.length === 0) { showNotice("No data!"); btnDownload.innerText = "⬇ EXCEL"; return; } 
                 exportList.sort((a,b) => a.raw_sort_time - b.raw_sort_time); 
-                exportToCSV(exportList, `Radar_QUEUE_FULL_${today}.csv`); 
+                exportToCSV(exportList, `Radar_${myAirport}_FULL_${today}.csv`); 
                 btnDownload.innerText = "✅ DONE ✔️"; 
                 setTimeout(() => { btnDownload.innerText = "⬇ EXCEL"; }, 3000); 
             }); 
@@ -554,7 +550,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar A.69: PWA Ready!'))
+                    .then(reg => console.log('Radar A.74: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
