@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar A.77 - Smart Init</title>
+    <title>Radar A.79 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.77 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.79 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -224,6 +224,13 @@
             <div class="modal-title-notice">DOWNLOAD DATA</div>
             <div class="modal-text" style="font-size: 13px; margin-bottom: 8px;">Enter Flight No (Leave blank for ALL)</div>
             <input type="text" id="dl-flight-input" placeholder="Ex: VN206, VJ392" style="width: 100%; height: 38px; border-radius: 4px; font-size: 14px; font-weight: 800; border: 1px solid #cbd5e1; margin-bottom: 15px; text-align: center; text-transform: uppercase;">
+            
+            <div class="modal-text" style="font-size: 13px; margin-bottom: 8px;">Select Date Range (Leave blank for ALL)</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="date" id="dl-start-date" style="flex: 1; height: 38px; border-radius: 4px; font-size: 12px; font-weight: 800; border: 1px solid #cbd5e1; text-align: center; color: #1e293b; background: #f8fafc;">
+                <input type="date" id="dl-end-date" style="flex: 1; height: 38px; border-radius: 4px; font-size: 12px; font-weight: 800; border: 1px solid #cbd5e1; text-align: center; color: #1e293b; background: #f8fafc;">
+            </div>
+
             <div class="modal-buttons"><button id="btn-dl-confirm" class="btn-modal btn-yes">OK</button><button id="btn-dl-cancel" class="btn-modal btn-no">CANCEL</button></div>
         </div>
     </div>
@@ -256,6 +263,8 @@
         const aboutModal = document.getElementById('aboutModal');
         const downloadModal = document.getElementById('downloadModal');
         const dlFlightInput = document.getElementById('dl-flight-input');
+        const dlStartDate = document.getElementById('dl-start-date');
+        const dlEndDate = document.getElementById('dl-end-date');
         const btnDlConfirm = document.getElementById('btn-dl-confirm');
         const btnDlCancel = document.getElementById('btn-dl-cancel');
 
@@ -513,6 +522,14 @@
             if (!dataList || !dataList.length) return;
             const headers = ['date', 'flight', 'reg', 'type', 'o_iata', 'd_iata', 'aircraft', 'dep_sched', 'arr_sched', 'dep_est', 'arr_est', 'dep_real', 'arr_real', 'status'];
             let csvContent = "\uFEFF"; 
+            
+            // Add Header Rows
+            const firstDate = dataList[0].date;
+            const lastDate = dataList[dataList.length - 1].date;
+            
+            csvContent += '"THỐNG KÊ SỐ LIỆU CẤT HẠ CÁNH CÁC CHUYẾN BAY"\r\n';
+            csvContent += `"Giai đoạn từ ${firstDate} đến ${lastDate}"\r\n`;
+
             csvContent += headers.join(',') + '\r\n';
             dataList.forEach(row => {
                 let rowData = headers.map(header => {
@@ -525,6 +542,10 @@
                 });
                 csvContent += rowData.join(',') + '\r\n';
             });
+            
+            // Thêm dòng ghi chú ở cuối danh sách
+            csvContent += '"* Ghi chú : thông tin được cập nhật từ trang flighradar24, hãy kiểm tra cẩn thận trước khi sử dụng "\r\n';
+
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -540,6 +561,8 @@
             const myAirport = airportInput.value.toUpperCase().trim(); 
             if (!myAirport) { showNotice("Please enter an airport!"); return; } 
             dlFlightInput.value = ""; 
+            dlStartDate.value = "";
+            dlEndDate.value = "";
             downloadModal.style.display = "block";
         };
 
@@ -550,6 +573,8 @@
             const myAirport = airportInput.value.toUpperCase().trim();
             const filterTextRaw = dlFlightInput.value.toUpperCase().trim();
             const filterArray = filterTextRaw ? filterTextRaw.split(',').map(s => s.trim()).filter(s => s) : [];
+            const startDateVal = dlStartDate.value;
+            const endDateVal = dlEndDate.value;
             
             btnDownload.innerText = "⏳..."; 
             get(ref(db, `database_flights/${myAirport}`)).then(snapshot => { 
@@ -557,23 +582,29 @@
                 if (snapshot.exists()) { 
                     const allData = snapshot.val(); 
                     Object.keys(allData).forEach(dateKey => { 
-                        const dailyFlights = allData[dateKey]; 
-                        Object.values(dailyFlights).forEach(f => { 
-                            let isMatch = false;
-                            if (filterArray.length === 0) {
-                                isMatch = true;
-                            } else if (f.flight) {
-                                const flightUpper = f.flight.toUpperCase();
-                                isMatch = filterArray.some(keyword => flightUpper.includes(keyword));
-                            }
-                            
-                            if (isMatch) {
-                                f.date = dateKey; exportList.push(f); 
-                            }
-                        }); 
+                        let dateMatch = true;
+                        if (startDateVal && dateKey < startDateVal) dateMatch = false;
+                        if (endDateVal && dateKey > endDateVal) dateMatch = false;
+
+                        if (dateMatch) {
+                            const dailyFlights = allData[dateKey]; 
+                            Object.values(dailyFlights).forEach(f => { 
+                                let isMatch = false;
+                                if (filterArray.length === 0) {
+                                    isMatch = true;
+                                } else if (f.flight) {
+                                    const flightUpper = f.flight.toUpperCase();
+                                    isMatch = filterArray.some(keyword => flightUpper.includes(keyword));
+                                }
+                                
+                                if (isMatch) {
+                                    f.date = dateKey; exportList.push(f); 
+                                }
+                            }); 
+                        }
                     }); 
                 } 
-                if (exportList.length === 0) { showNotice("No data found for this flight!"); btnDownload.innerText = "⬇ EXCEL"; return; } 
+                if (exportList.length === 0) { showNotice("No data found for this flight/date range!"); btnDownload.innerText = "⬇ EXCEL"; return; } 
                 
                 exportList.sort((a,b) => {
                     if (a.date === b.date) return a.raw_sort_time - b.raw_sort_time;
@@ -595,7 +626,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar A.77: PWA Ready!'))
+                    .then(reg => console.log('Radar A.79: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
