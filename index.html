@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Radar A.80 - Smart Init</title>
+    <title>Radar A.81 - Smart Init</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #8c7a6b; color: #1e293b; margin: 0; padding: 5px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.15); }
         * { box-sizing: border-box; }
@@ -132,7 +132,7 @@
 <body>
 
     <div class="top-section-bg">
-        <h2>RADAR A.80 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
+        <h2>RADAR A.81 <span id="id-badge" class="id-badge" style="display:none">...</span></h2>
 
         <div class="control-panel">
             <div class="settings-group" style="flex: 1; min-width: 60px;">
@@ -518,7 +518,7 @@
         };
         const savedMode = localStorage.getItem('dl_mode'); if (savedMode === 'AUTO') { modeToggle.click(); }
         
-        function exportToXLS(dataList, filename) {
+        function exportToXLS(dataList, filename, airportCode) {
             if (!dataList || !dataList.length) return;
             const headers = ['date', 'flight', 'reg', 'type', 'o_iata', 'd_iata', 'aircraft', 'dep_sched', 'arr_sched', 'dep_est', 'arr_est', 'dep_real', 'arr_real', 'status'];
             
@@ -528,7 +528,7 @@
             let tableHTML = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1">';
             
             // Add Header Rows with colspan
-            tableHTML += `<tr><th colspan="14" style="font-size: 16px; text-align: left;">THỐNG KÊ SỐ LIỆU CẤT HẠ CÁNH CÁC CHUYẾN BAY</th></tr>`;
+            tableHTML += `<tr><th colspan="14" style="font-size: 16px; text-align: left;">THỐNG KÊ SỐ LIỆU CẤT HẠ CÁNH CÁC CHUYẾN BAY TẠI SÂN BAY ${airportCode}</th></tr>`;
             tableHTML += `<tr><th colspan="14" style="font-size: 14px; text-align: left; font-weight: normal;">Giai đoạn từ ${firstDate} đến ${lastDate}</th></tr>`;
             
             // Add Column Headers
@@ -623,18 +623,18 @@
                 // Đổi đuôi tệp thành .xls
                 const fileName = filterArray.length > 0 ? `Radar_${myAirport}_${safeFilterName}_${today}.xls` : `Radar_${myAirport}_FULL_${today}.xls`;
                 
-                exportToXLS(exportList, fileName); 
+                exportToXLS(exportList, fileName, myAirport); 
                 btnDownload.innerText = "✅ DONE ✔️"; 
                 setTimeout(() => { btnDownload.innerText = "⬇ EXCEL"; }, 3000); 
             }); 
         };
         
-        function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ DONE ✔️"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) { exportList.sort((a,b) => { if (a.date === b.date) return a.raw_sort_time - b.raw_sort_time; return a.date.localeCompare(b.date); }); exportToXLS(exportList, `Radar_${airport}_Month_${targetMonthStr}.xls`); } if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ DONE ✔️"; } }); } }
+        function checkAutoDownloadAndClean() { if (downloadMode !== 'AUTO') return; const now = new Date(); const dateInVietnam = new Date(now.getTime() + 7*60*60*1000); const currentDay = dateInVietnam.getDate(); if (currentDay <= 10) { let prevMonth = dateInVietnam.getMonth(); let prevYear = dateInVietnam.getFullYear(); if (prevMonth === 0) { prevMonth = 12; prevYear -= 1; } const targetMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`; const downloadedMonth = localStorage.getItem('last_downloaded_month'); if (downloadedMonth === targetMonthStr) { btnDownload.innerText = "✅ DONE ✔️"; return; } btnDownload.innerText = "🔄 AUTO..."; const airport = "PXU"; get(ref(db, `database_flights/${airport}`)).then(snapshot => { if (snapshot.exists()) { const allData = snapshot.val(); let exportList = []; let deletePromises = []; Object.keys(allData).forEach(dateKey => { if (dateKey.startsWith(targetMonthStr)) { Object.values(allData[dateKey]).forEach(f => { f.date = dateKey; exportList.push(f); }); } if (dateKey < targetMonthStr) { deletePromises.push(remove(ref(db, `database_flights/${airport}/${dateKey}`))); } }); if (exportList.length > 0) { exportList.sort((a,b) => { if (a.date === b.date) return a.raw_sort_time - b.raw_sort_time; return a.date.localeCompare(b.date); }); exportToXLS(exportList, `Radar_${airport}_Month_${targetMonthStr}.xls`, airport); } if (deletePromises.length > 0) Promise.all(deletePromises); localStorage.setItem('last_downloaded_month', targetMonthStr); btnDownload.innerText = "✅ DONE ✔️"; } }); } }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Radar A.80: PWA Ready!'))
+                    .then(reg => console.log('Radar A.81: PWA Ready!'))
                     .catch(err => console.log('PWA Error:', err));
             });
         }
